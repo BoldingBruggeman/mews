@@ -9,10 +9,10 @@ start_date = date(2022, 1, 1)
 stop_date = date(2023, 1, 1)
 
 setup="ohra"
-script="kaj.py"
+script="run_ohra.py"
 
 start = start_date
-start = date(2022, 4, 1)
+start = date(2022, 5, 1)
 while start < stop_date:
     days_in_month = calendar.monthrange(start.year, start.month)[1]
     stop = start + timedelta(days=days_in_month)

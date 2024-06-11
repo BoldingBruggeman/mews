@@ -38,7 +38,7 @@ def handle_bathymetry(
     return xda
 
 
-def create_lon_lat_gridf(
+def create_lon_lat_grid(
     xds: xr.DataArray,
     epsg: str,
     verbose: bool = False,
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     bathy = handle_bathymetry(args.tif_file, verbose=args.verbose)
 
-    lon, lat = create_lon_lat_gridf(bathy, args.epsg, verbose=args.verbose)
+    lon, lat = create_lon_lat_grid(bathy, args.epsg, verbose=args.verbose)
 
     ds = convert_ds_netcdf([bathy, lon, lat], args.nc_path, verbose=args.verbose)
 

@@ -8,3 +8,11 @@ Below are the steps required - after the initial cloning it is important to keep
   3. When ready - create a *pull request - PR*
 
 Be sure to do a *git pull* on a regular basis to keep up with other contributions.
+
+
+
+## On the proper naming of data describing the depth of lakes
+
+From https://en.wikipedia.org/wiki/Bathymetry:
+
+Bathymetry (/bəˈθɪmətri/; from Ancient Greek βαθύς (bathús) 'deep', and μέτρον (métron) 'measure')[1][2] is the study of underwater depth of ocean floors (seabed topography), lake floors, or river floors. In other words, bathymetry is the underwater equivalent to hypsometry or topography. The first recorded evidence of water depth measurements are from Ancient Egypt over 3000 years ago.

@@ -399,10 +399,10 @@ jordan = domain.rivers.add_by_location("jordan", 35.613740, 32.886814, spherical
 sim = pygetm.Simulation(
     domain,
     runtype=pygetm.BAROCLINIC,
-    gotm=os.path.join('../../../../getm-setups/NorthSea', "gotmturb.nml"),
+    #gotm=os.path.join('../../../../getm-setups/NorthSea', "gotmturb.nml"),
     airsea=pygetm.airsea.FluxesFromMeteo(calculate_evaporation=True),
     radiation=pygetm.radiation.TwoBand(jerlov_type=pygetm.Jerlov.Type_II),
-    fabm=pygetm.fabm.FABM('fabm.yaml', bioshade_feedback=True, repair=False)
+    #fabm=pygetm.fabm.FABM('fabm.yaml', bioshade_feedback=True, repair=False)
 )
 
 ERA_path = 'era5_????.nc'
@@ -417,7 +417,9 @@ sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
 
 if jordan:
     jordan.flow.set(jordan_data, climatology=True)
-# domain.plot(show_mesh=False).savefig("kinneret.png")
+
+domain.plot().savefig("kinneret_mesh.png")
+domain.plot(show_mesh=False).savefig("kinneret_mask.png")
 
 t = pygetm.input.from_nc("state.0000420768.t001 1.nc", "Temp").isel(T=0)
 t = t.where(t != 0, np.nan)

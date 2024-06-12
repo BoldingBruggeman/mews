@@ -32,14 +32,13 @@ while start < stop_date:
 
     restart_out = f"--save_restart restart_{setup}_{y}.nc"
 
-    command = "mpiexec -np 4 python %s \"%s\" \"%s\" %s %s %s" % (script, start.strftime('%Y-%m-%d %H:%M:%S'), stop.strftime('%Y-%m-%d %H:%M:%S'), option, restart_in, restart_out )
-    #print(command)
-#    subprocess.run(["echo", command])
+    output_dir = f"--output_dir {x}"
+
+    command = "mpiexec -np 4 python %s \"%s\" \"%s\" %s %s %s %s" % (script, start.strftime('%Y-%m-%d %H:%M:%S'), stop.strftime('%Y-%m-%d %H:%M:%S'), option, restart_in, restart_out, output_dir)
     subprocess.run([command], shell=True)
     subprocess.run(["mkdir", x])
     subprocess.run(["mv", "meteo.nc", "ohra_2d.nc", "ohra_3d.nc", x])
     #subprocess.run(["mv", "getm-\*.log", x])
-    #print(command)
 
     start = stop
 

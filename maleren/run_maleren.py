@@ -2,7 +2,8 @@
 
 import datetime
 import os.path
-import pathlib
+
+from pathlib import Path
 from typing import Optional
 
 import cftime
@@ -126,12 +127,17 @@ def create_simulation(
 
 
 def create_output(
+    output_dir: str,
     sim: pygetm.simulation.Simulation,
     **kwargs,
 ):
     sim.logger.info("Setting up output")
+
+    path = Path(output_dir, "meteo.nc")
+    # path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(parents=True)
     output = sim.output_manager.add_netcdf_file(
-        "meteo.nc", interval=datetime.timedelta(hours=1), sync_interval=None
+        str(path), interval=datetime.timedelta(hours=1), sync_interval=None
     )
     output.request(
         "u10",
@@ -142,8 +148,10 @@ def create_output(
         "tp",
     )
 
+    path = Path(output_dir, "maleren_2d.nc")
+    path.parent.mkdir(parents=True, exist_ok=True)
     output = sim.output_manager.add_netcdf_file(
-        "maleren_2d.nc", interval=datetime.timedelta(hours=1), sync_interval=None
+        str(path), interval=datetime.timedelta(hours=1), sync_interval=None
     )
     output.request("zt", "u1", "v1", "tausxu", "tausyv")
     if args.debug_output:
@@ -153,8 +161,10 @@ def create_output(
         # output.request("ru", "rru", "rv", "rrv")
 
     if sim.runtype > pygetm.BAROTROPIC_2D:
+        path = Path(output_dir, "maleren_3d.nc")
+        path.parent.mkdir(parents=True, exist_ok=True)
         output = sim.output_manager.add_netcdf_file(
-            "maleren_3d.nc", interval=datetime.timedelta(hours=6), sync_interval=None
+            str(path), interval=datetime.timedelta(hours=6), sync_interval=None
         )
     output.request("uk", "vk", "ww", "SS", "num")
     if args.debug_output:
@@ -195,9 +205,21 @@ def run(
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("start", help="simulation start time - yyyy-mm-dd hh:mi:ss")
     parser.add_argument("stop", help="simulation stop time - yyyy-mm-dd hh:mi:ss")
+    parser.add_argument(
+        "--setup_dir",
+        type=Path,
+        help="Path to configuration files - not used yet",
+        default=".",
+    )
+    parser.add_argument(
+        "--output_dir", type=str, help="Path to save output files", default="."
+    )
+
     parser.add_argument(
         "--initial",
         action="store_true",
@@ -242,7 +264,7 @@ if __name__ == "__main__":
     sim = create_simulation(domain, args.runtype)
 
     if args.output and not args.dryrun:
-        create_output(sim)
+        create_output(args.output_dir, sim)
 
     if args.save_restart and not args.dryrun:
         sim.output_manager.add_restart(args.save_restart)

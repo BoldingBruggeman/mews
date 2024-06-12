@@ -32,6 +32,12 @@ while start < stop_date:
 
     restart_out = f"--save_restart restart_{setup}_{y}.nc"
 
+    p = Path(x)
+    if p.is_dir():
+        print(f"{x} already exists - move/delete and run again"
+        exit()  
+    else:       
+        p.mkdir(parents=True)
     output_dir = f"--output_dir {x}"
 
     command = "mpiexec -np %d python %s \"%s\" \"%s\" %s %s %s %s" % (np, script, start.strftime('%Y-%m-%d %H:%M:%S'), stop.strftime('%Y-%m-%d %H:%M:%S'), option, restart_in, restart_out, output_dir)

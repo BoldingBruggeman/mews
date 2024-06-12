@@ -257,6 +257,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    if args.output_dir != ".":
+        p = Path(args.output_dir)
+        if not p.is_dir():
+            print(f"{args.output_dir} does not exist - create and run again")
+            exit()
+
     domain = create_domain(args.runtype)
     if args.plot_domain:
         f = domain.plot()

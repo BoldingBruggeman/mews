@@ -134,8 +134,6 @@ def create_output(
     sim.logger.info("Setting up output")
 
     path = Path(output_dir, "meteo.nc")
-    # path.parent.mkdir(parents=True, exist_ok=True)
-    path.parent.mkdir(parents=True)
     output = sim.output_manager.add_netcdf_file(
         str(path), interval=datetime.timedelta(hours=1), sync_interval=None
     )
@@ -149,7 +147,6 @@ def create_output(
     )
 
     path = Path(output_dir, "maleren_2d.nc")
-    path.parent.mkdir(parents=True, exist_ok=True)
     output = sim.output_manager.add_netcdf_file(
         str(path), interval=datetime.timedelta(hours=1), sync_interval=None
     )
@@ -162,7 +159,6 @@ def create_output(
 
     if sim.runtype > pygetm.BAROTROPIC_2D:
         path = Path(output_dir, "maleren_3d.nc")
-        path.parent.mkdir(parents=True, exist_ok=True)
         output = sim.output_manager.add_netcdf_file(
             str(path), interval=datetime.timedelta(hours=6), sync_interval=None
         )
@@ -251,6 +247,12 @@ if __name__ == "__main__":
         "--plot_domain", action="store_true", help="Plot the calculation domain"
     )
     args = parser.parse_args()
+
+    if args.output_dir != '.':
+        p = Path(args.output_dir)
+        if not p.is_dir():
+            print(f"{x} does not exist - create and run again"
+            exit()
 
     domain = create_domain(args.runtype)
     if args.plot_domain:

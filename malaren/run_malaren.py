@@ -13,7 +13,7 @@ setup = "malaren"
 
 def create_domain(
     runtype: int,
-    rivers: bool = False,
+    rivers: bool,
     **kwargs,
 ):
     import netCDF4
@@ -148,7 +148,7 @@ def create_output(
         "tp",
     )
 
-    path = Path(output_dir, setup+"_2d.nc")
+    path = Path(output_dir, setup + "_2d.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
         interval=datetime.timedelta(hours=1),
@@ -162,7 +162,7 @@ def create_output(
         # output.request("ru", "rru", "rv", "rrv")
 
     if sim.runtype > pygetm.BAROTROPIC_2D:
-        path = Path(output_dir, setup+"_3d.nc")
+        path = Path(output_dir, setup + "_3d.nc")
         output = sim.output_manager.add_netcdf_file(
             str(path),
             interval=datetime.timedelta(hours=6),
@@ -235,6 +235,9 @@ if __name__ == "__main__":
         default=pygetm.BAROCLINIC,
     )
     parser.add_argument(
+        "--no_rivers", action="store_false", dest="rivers", help="No river input"    
+    )
+    parser.add_argument(
         "--no_output",
         action="store_false",
         dest="output",
@@ -260,7 +263,12 @@ if __name__ == "__main__":
             print(f"Folder {args.output_dir} does not exist - create and run again")
             exit()
 
-    domain = create_domain(args.runtype)
+    domain = create_domain(args.runtype, args.rivers)
+
+    sim = create_simulation(domain, args.runtype)
+
+    # for plot options see:
+    # https://github.com/BoldingBruggeman/getm-rewrite/blob/fea843cbc78bd7d166bdc5ec71c8d3e3ed080a35/python/pygetm/domain.py#L1943
     if args.plot_domain:
         f = domain.plot()
         if f is not None:
@@ -268,8 +276,6 @@ if __name__ == "__main__":
         f = domain.plot(show_mesh=False, show_mask=True)
         if f is not None:
             f.savefig("domain_mask.png")
-
-    sim = create_simulation(domain, args.runtype)
 
     if args.output and not args.dryrun:
         create_output(args.output_dir, sim)

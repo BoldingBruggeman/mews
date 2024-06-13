@@ -5,12 +5,12 @@ import calendar
 import subprocess
 
 start_date = date(2022, 1, 1)
-#stop_date = date(2022, 4, 1)
+# stop_date = date(2022, 4, 1)
 stop_date = date(2023, 1, 1)
 
-setup="ohra"
-script="run_ohra.py"
-np=4
+setup = "ohra"
+script = "run_ohra.py"
+np = 4
 
 start = date(2022, 5, 1)
 start = start_date
@@ -24,10 +24,10 @@ while start < stop_date:
     x = start.strftime("%Y%m%d")
     y = stop.strftime("%Y%m%d")
     if start == start_date:
-        option = '--initial'
-        restart_in = ''
+        option = "--initial"
+        restart_in = ""
     else:
-        option = ''
+        option = ""
         restart_in = f"--load_restart restart_{setup}_{x}.nc"
 
     restart_out = f"--save_restart restart_{setup}_{y}.nc"
@@ -35,14 +35,22 @@ while start < stop_date:
     p = Path(x)
     if p.is_dir():
         print(f"{x} already exists - move/delete and run again")
-        exit()        
+        exit()
     else:
         p.mkdir(parents=True)
     output_dir = f"--output_dir {x}"
 
-    command = "mpiexec -np %d python %s \"%s\" \"%s\" %s %s %s %s" % (np, script, start.strftime('%Y-%m-%d %H:%M:%S'), stop.strftime('%Y-%m-%d %H:%M:%S'), option, restart_in, restart_out, output_dir)
+    command = 'mpiexec -np %d python %s "%s" "%s" %s %s %s %s' % (
+        np,
+        script,
+        start.strftime("%Y-%m-%d %H:%M:%S"),
+        stop.strftime("%Y-%m-%d %H:%M:%S"),
+        option,
+        restart_in,
+        restart_out,
+        output_dir,
+    )
     subprocess.run([command], shell=True)
-    #subprocess.run(["mv", "getm-\*.log", x])
+    # subprocess.run(["mv", "getm-\*.log", x])
 
     start = stop
-

@@ -8,7 +8,7 @@ import cftime
 
 import pygetm
 
-setup = "maleren"
+setup = "malaren"
 
 
 def create_domain(

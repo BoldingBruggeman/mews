@@ -8,8 +8,8 @@ start_date = date(2022, 1, 1)
 # stop_date = date(2022, 4, 1)
 stop_date = date(2023, 1, 1)
 
-setup = "maleren"
-script = "run_maleren.py"
+setup = "malaren"
+script = "run_malaren.py"
 np = 4
 
 start = date(2022, 4, 1)

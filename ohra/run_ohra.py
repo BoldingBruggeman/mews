@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import datetime
-import os.path
 from pathlib import Path
 from typing import Optional
 
 import cftime
 
 import pygetm
+
+setup = "ohra"
 
 
 def create_domain(
@@ -133,8 +134,6 @@ def create_output(
     sim.logger.info("Setting up output")
 
     path = Path(output_dir, "meteo.nc")
-    # path.parent.mkdir(parents=True, exist_ok=True)
-    path.parent.mkdir(parents=True)
     output = sim.output_manager.add_netcdf_file(
         str(path),
         interval=datetime.timedelta(hours=1),
@@ -149,8 +148,7 @@ def create_output(
         "tp",
     )
 
-    path = Path(output_dir, "ohra_2d.nc")
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(output_dir, setup+"_2d.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
         interval=datetime.timedelta(hours=1),
@@ -164,8 +162,7 @@ def create_output(
         # output.request("ru", "rru", "rv", "rrv")
 
     if sim.runtype > pygetm.BAROTROPIC_2D:
-        path = Path(output_dir, "ohra_3d.nc")
-        path.parent.mkdir(parents=True, exist_ok=True)
+        path = Path(output_dir, setup+"_3d.nc")
         output = sim.output_manager.add_netcdf_file(
             str(path),
             interval=datetime.timedelta(hours=6),
@@ -218,7 +215,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--setup_dir",
         type=Path,
-        help="Path to configuration files",
+        help="Path to configuration files - not used yet",
         default=".",
     )
     parser.add_argument(
@@ -260,7 +257,7 @@ if __name__ == "__main__":
     if args.output_dir != ".":
         p = Path(args.output_dir)
         if not p.is_dir():
-            print(f"{args.output_dir} does not exist - create and run again")
+            print(f"Folder {args.output_dir} does not exist - create and run again")
             exit()
 
     domain = create_domain(args.runtype)
@@ -285,7 +282,7 @@ if __name__ == "__main__":
 
     simstart = datetime.datetime.strptime(args.start, "%Y-%m-%d %H:%M:%S")
     simstop = datetime.datetime.strptime(args.stop, "%Y-%m-%d %H:%M:%S")
-    profile = "ohra" if args.profile is not None else None
+    profile = setup if args.profile is not None else None
     run(
         sim,
         simstart,

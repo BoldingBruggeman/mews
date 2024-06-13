@@ -34,7 +34,7 @@ while start < stop_date:
 
     p = Path(x)
     if p.is_dir():
-        print(f"{x} already exists - move/delete and run again")
+        print(f"Folder {x} already exists - move/delete and run again")
         exit()
     else:
         p.mkdir(parents=True)

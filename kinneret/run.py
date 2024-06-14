@@ -2,6 +2,7 @@
 
 from datetime import date, timedelta
 import calendar
+from pathlib import Path
 import subprocess
 
 start_date = date(2022, 1, 1)
@@ -9,7 +10,7 @@ start_date = date(2022, 1, 1)
 stop_date = date(2023, 1, 1)
 
 setup = "kinneret"
-script = "run_kinneret_new.py"
+script = "run_kinneret.py"
 np = 4
 
 start = date(2022, 4, 1)

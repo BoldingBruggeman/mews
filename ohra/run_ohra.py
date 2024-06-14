@@ -49,11 +49,6 @@ def create_domain(
             z0=0.01,
             **final_kwargs,
         )
-    domain.mask_indices(261, 270 + 1, 43, 43 + 1)
-    domain.mask_indices(334, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(335, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(304, 304 + 1, 38, 44 + 1)
-
     domain.limit_velocity_depth()
     domain.cfl_check()
 
@@ -296,7 +291,7 @@ if __name__ == "__main__":
         simstart,
         simstop,
         dryrun=args.dryrun,
-        report=datetime.timedelta(hours=1),
-        report_totals=datetime.timedelta(days=1),
+        report=datetime.timedelta(hours=6),
+        report_totals=datetime.timedelta(days=7),
         profile=profile,
     )

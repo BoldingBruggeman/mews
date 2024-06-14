@@ -302,7 +302,7 @@ if __name__ == "__main__":
         simstart,
         simstop,
         dryrun=args.dryrun,
-        report=datetime.timedelta(hours=1),
-        report_totals=datetime.timedelta(days=1),
+        report=datetime.timedelta(hours=6),
+        report_totals=datetime.timedelta(days=7),
         profile=profile,
     )

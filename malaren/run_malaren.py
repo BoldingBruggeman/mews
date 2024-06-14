@@ -270,7 +270,7 @@ if __name__ == "__main__":
     # for plot options see:
     # https://github.com/BoldingBruggeman/getm-rewrite/blob/fea843cbc78bd7d166bdc5ec71c8d3e3ed080a35/python/pygetm/domain.py#L1943
     if args.plot_domain:
-        f = domain.plot()
+        f = domain.plot(show_subdomains = True)
         if f is not None:
             f.savefig("domain_mesh.png")
         f = domain.plot(show_mesh=False, show_mask=True)
@@ -294,7 +294,7 @@ if __name__ == "__main__":
         simstart,
         simstop,
         dryrun=args.dryrun,
-        report=datetime.timedelta(hours=1),
-        report_totals=datetime.timedelta(days=1),
+        report=datetime.timedelta(hours=3),
+        report_totals=datetime.timedelta(days=7),
         profile=profile,
     )

@@ -38,7 +38,7 @@ def create_domain(
 
     final_kwargs.update(kwargs)
 
-    with netCDF4.Dataset("Bathymetry/bathymetry.nc") as nc:
+    with netCDF4.Dataset("Bathymetry/bathymetry_400m.nc") as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_cartesian(
             nc["X"][:],

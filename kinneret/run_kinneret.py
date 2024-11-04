@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# run example: run_kinneret.py "2022-02-01 12:00:00" "2022-02-02 12:00:00" --initial
 import datetime
 from pathlib import Path
 from typing import Optional
@@ -86,12 +86,16 @@ def create_simulation(
         delay_slow_ip=True,
     )
     final_kwargs.update(kwargs)
+    #sim = pygetm.Simulation(domain, runtype=runtype,fabm="fabm-selma.yaml", **final_kwargs)
     sim = pygetm.Simulation(domain, runtype=runtype, **final_kwargs)
 
     if sim.runtype < pygetm.BAROCLINIC:
         sim.sst = sim.airsea.t2m
     if sim.runtype == pygetm.BAROCLINIC:
-        sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        #sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        sim.radiation.A.set(0.7)
+        sim.radiation.kc1.set(0.54) #1/g1 in gotm
+        sim.radiation.kc2.set(3.23)
 
     if args.initial and sim.runtype == pygetm.BAROCLINIC:
         if True:
@@ -121,6 +125,8 @@ def create_simulation(
         sim.salt[..., domain.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.density.convert_ts(sim.salt, sim.temp)
 
+    #sim["diatoms_c"] set(pygetm.input.from_nc("some.nc","dia")) example of initial conditions of diatoms
+
     ERA_path = "ERA5/era5_????.nc"
     sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
     sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10"))
@@ -130,6 +136,12 @@ def create_simulation(
     sim.airsea.tcc.set(pygetm.input.from_nc(ERA_path, "tcc"))
     ERA_path = "ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
+
+    for river in sim.domain.rivers.values():
+        river.flow.set(pygetm.input.from_nc(f"{river.name}.nc", "Flow"))
+        river["temp"].set(pygetm.input.from_nc(f"{river.name}.nc", "Temp"))
+        river["salt"].set(pygetm.input.from_nc(f"{river.name}.nc", "Salt"))
+   
 
     return sim
 
@@ -186,7 +198,7 @@ def create_output(
             output.request("idpdx", "idpdy")
 
     if sim.fabm:
-        output.request("par", "med_ergom_o2", "med_ergom_OFL", "med_ergom_dd")
+        output.request(*sim.fabm.default_outputs)
 
 
 def run(

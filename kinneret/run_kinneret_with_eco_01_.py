@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# This is for testing and experimenting. not for use
 # run example: python run_kinneret_with_eco_01.py "2022-02-01 12:00:00" "2022-02-02 12:00:00" --initial
 import datetime
 from pathlib import Path

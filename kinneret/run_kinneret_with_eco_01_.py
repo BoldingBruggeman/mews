@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# run example: run_kinneret.py "2022-02-01 12:00:00" "2022-02-02 12:00:00" --initial
+# This is for testing and experimenting. not for use
+# run example: python run_kinneret_with_eco_01.py "2022-02-01 12:00:00" "2022-02-02 12:00:00" --initial
 import datetime
 from pathlib import Path
 from typing import Optional
@@ -63,9 +64,11 @@ def create_domain(
             with netCDF4.Dataset(river) as r:
                 lon = r["lon"][:]
                 lat = r["lat"][:]
+                zl = 1
+                zu = 0
                 river_list.append(
                     domain.rivers.add_by_location(
-                        name, float(lon), float(lat), spherical=True
+                        name, float(zl), float(zu), float(lon), float(lat), spherical=True
                     )
                 )
 
@@ -86,8 +89,8 @@ def create_simulation(
         delay_slow_ip=True,
     )
     final_kwargs.update(kwargs)
-    #sim = pygetm.Simulation(domain, runtype=runtype,fabm="fabm-selma.yaml", **final_kwargs)
-    sim = pygetm.Simulation(domain, runtype=runtype, **final_kwargs)
+    sim = pygetm.Simulation(domain, runtype=runtype,fabm="fabm-selma01.yaml", **final_kwargs) #fabm-selma01.yaml
+    #sim = pygetm.Simulation(domain, runtype=runtype, **final_kwargs)
 
     if sim.runtype < pygetm.BAROCLINIC:
         sim.sst = sim.airsea.t2m
@@ -137,12 +140,21 @@ def create_simulation(
     ERA_path = "ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
 
+    r1 =0
     for river in sim.domain.rivers.values():
         river.flow.set(pygetm.input.from_nc(f"{river.name}.nc", "Flow"))
         river["temp"].set(pygetm.input.from_nc(f"{river.name}.nc", "Temp"))
         river["salt"].set(pygetm.input.from_nc(f"{river.name}.nc", "Salt"))
-   
-
+        if r1==0:
+            river["selma_po"].follow_target_cell = False #(True makes it use the value from the basin)
+            river["selma_po"].set(pygetm.input.from_nc("Rivers/inflow_q_Jordan.nc", "PO4"))
+            river["selma_aa"].follow_target_cell = False
+            river["selma_aa"].set(pygetm.input.from_nc("Rivers/inflow_q_Jordan.nc", "NH4"))
+            river["selma_nn"].follow_target_cell = False
+            river["selma_nn"].set(pygetm.input.from_nc("Rivers/inflow_q_Jordan.nc", "NO3"))
+            river["selma_dd"].follow_target_cell = False
+            river["selma_dd"].set(pygetm.input.from_nc("Rivers/inflow_q_Jordan.nc", "POM"))
+        r1 = r1+1
     return sim
 
 
@@ -306,6 +318,8 @@ if __name__ == "__main__":
     if args.load_restart and not args.dryrun:
         simstart = sim.load_restart(args.load_restart)
 
+    #simstart = datetime.datetime.strptime("2022-02-01 12:00:00", "%Y-%m-%d %H:%M:%S")
+    #simstop = datetime.datetime.strptime("2022-02-02 12:00:00", "%Y-%m-%d %H:%M:%S")
     simstart = datetime.datetime.strptime(args.start, "%Y-%m-%d %H:%M:%S")
     simstop = datetime.datetime.strptime(args.stop, "%Y-%m-%d %H:%M:%S")
     profile = setup if args.profile is not None else None

@@ -4,7 +4,7 @@ import numpy as np
 import cmocean
 
 def temperature(itime, i=20):
-    with netCDF4.Dataset('kinneret.nc') as nc:
+    with netCDF4.Dataset('kinneret_3d.nc') as nc:
         temp = nc['temp'][itime, :, :, i]
         z = nc['zct'][itime, :, :, i]
         y = nc['yt'][:, i]
@@ -22,8 +22,8 @@ def temperature(itime, i=20):
     pyplot.close(fig)
 
 def oxygen(itime, i=20):
-    with netCDF4.Dataset('kinneret.nc') as nc:
-        o2 = nc['selmaprotbas_o2'][itime, :, :, i]
+    with netCDF4.Dataset('kinneret_3d.nc') as nc:
+        o2 = nc['selma_o2'][itime, :, :, i]
         z = nc['zct'][itime, :, :, i]
         y = nc['yt'][:, i]
         nctime = nc['time']
@@ -40,7 +40,7 @@ def oxygen(itime, i=20):
     pyplot.close(fig)
 
 def cyanobacteria(itime, k=-1):
-    with netCDF4.Dataset('kinneret.nc') as nc:
+    with netCDF4.Dataset('kinneret_3d.nc') as nc:
         cyano = nc['cyanobacteria_c'][itime, k, :, :]
         u = nc['uk'][itime, -1, :, :]
         v = nc['vk'][itime, -1, :, :]
@@ -62,7 +62,7 @@ def cyanobacteria(itime, k=-1):
     fig.savefig(path, dpi=96)
     pyplot.close(fig)
 
-temperature(212)
-oxygen(212)
-for itime in range(2*365):
-    cyanobacteria(itime)
+temperature(105)
+oxygen(105)
+#for itime in range(2*365):
+#    cyanobacteria(itime)

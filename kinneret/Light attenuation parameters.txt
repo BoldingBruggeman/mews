@@ -1,0 +1,20 @@
+# code part that specify light atteniuation 3 parameters
+ if sim.runtype < pygetm.BAROCLINIC:
+        sim.sst = sim.airsea.t2m
+    if sim.runtype == pygetm.BAROCLINIC:
+        #sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        sim.radiation.A.set(0.7)
+        sim.radiation.kc1.set(1.0) #1/g1 in gotm
+        sim.radiation.kc2.set(17)
+		
+		
+# values used in GOTM Feb 2022 (before bioshading?)
+A =0.6948
+g1 = 1.8424
+g2 = 3.226
+
+#most recent values July 2022 with bioshading.
+A =0.7474
+g1 = 2.1461
+g2 = 4.902
+

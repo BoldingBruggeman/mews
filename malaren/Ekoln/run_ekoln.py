@@ -8,7 +8,7 @@ import cftime
 
 import pygetm
 
-setup = "malaren"
+setup = "ekoln"
 
 
 def create_domain(
@@ -37,7 +37,7 @@ def create_domain(
 
     final_kwargs.update(kwargs)
 
-    with netCDF4.Dataset("Bathymetry/bathymetry.nc") as nc:
+    with netCDF4.Dataset("Bathymetry/central_Ekoln_bathymetry.nc") as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_cartesian(
             nc["x"][:],
@@ -49,10 +49,10 @@ def create_domain(
             z0=0.01,
             **final_kwargs,
         )
-    domain.mask_indices(261, 270 + 1, 43, 43 + 1)
-    domain.mask_indices(334, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(335, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(304, 304 + 1, 38, 44 + 1)
+    # domain.mask_indices(261, 270 + 1, 43, 43 + 1)
+    # domain.mask_indices(334, 335 + 1, 49, 63 + 1)
+    # domain.mask_indices(335, 335 + 1, 49, 63 + 1)
+    # domain.mask_indices(304, 304 + 1, 38, 44 + 1)
 
     domain.limit_velocity_depth()
     domain.cfl_check()
@@ -128,27 +128,37 @@ def create_simulation(
         sim.temp[..., domain.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.salt[..., domain.T.mask == 0] = pygetm.constants.FILL_VALUE
 
-    ERA_path = "ERA5/era5_????.nc"
+    ERA_path = "../ERA5/era5_????.nc"
     sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
     sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10"))
     sim.airsea.t2m.set(pygetm.input.from_nc(ERA_path, "t2m") - 273.15)
     sim.airsea.d2m.set(pygetm.input.from_nc(ERA_path, "d2m") - 273.15)
     sim.airsea.sp.set(pygetm.input.from_nc(ERA_path, "sp"))
     sim.airsea.tcc.set(pygetm.input.from_nc(ERA_path, "tcc"))
-    ERA_path = "ERA5/precip_????.nc"
+    ERA_path = "../ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
     
     
     for river in sim.domain.rivers.values():
         if "outflow" in river.name:
-            # Outflow
+            ### Outflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/{river.name}_q.nc", river.name))
         else:
-            # Inflow
+            ### Inflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", river.name)) # .mean() ## Error here if I remove .mean()
             river["pfas_c"].set(1.0)
+            
+            # Nutrients
+            river["selma_po"].follow_target_cell = False #(True makes it use the value from the basin)
+            river["selma_po"].set(0.1937359)
+            river["selma_aa"].follow_target_cell = False
+            river["selma_aa"].set(3.5688794)
+            river["selma_nn"].follow_target_cell = False
+            river["selma_nn"].set(7.1377587)
+            river["selma_dd"].follow_target_cell = False
+            river["selma_dd"].set(60.6709493)
     
-    # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
+    sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     
     return sim
 
@@ -205,7 +215,7 @@ def create_output(
             output.request("idpdx", "idpdy")
 
     if sim.fabm:
-        output.request("pfas_c", "selma_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
+        output.request("pfas_c", "selma_po", "total_chlorophyll_calculator_result", "age_age_of_water")
 
 
 def run(
@@ -326,7 +336,7 @@ if __name__ == "__main__":
         sim.output_manager.add_restart(args.save_restart)
 
     if args.load_restart and not args.dryrun:
-        simstart = sim.load_restart(args.load_restart)
+        simstart = sim.load_restart(args.load_restart, decode_timedelta=False) # decode_timedelta=False is to avoid problems with age_of_water
 
     simstart = datetime.datetime.strptime(args.start, "%Y-%m-%d %H:%M:%S")
     simstop = datetime.datetime.strptime(args.stop, "%Y-%m-%d %H:%M:%S")

@@ -10,8 +10,6 @@ import cftime
 import pygetm
 
 setup = "kinneret"
-nz = 30
-timestep = 5.0
 
 
 def create_domain(
@@ -20,20 +18,37 @@ def create_domain(
     **kwargs,
 ):
     import netCDF4
+    import numpy as np
     import glob
-    import os
 
-    with netCDF4.Dataset(args.bathymetry_file) as nc:
+    if runtype > pygetm.BAROTROPIC_2D:
+        final_kwargs = dict(
+            nz=20,
+            vertical_coordinate_method=pygetm.VerticalCoordinates.GVC,
+            Dgamma=10.0,
+            ddu=0.75,
+            ddl=0.5,
+            Dmin=0.2,
+            Dcrit=1.0,
+        )
+    else:
+        final_kwargs = dict(
+            nz=1,
+        )
+
+    final_kwargs.update(kwargs)
+
+    with netCDF4.Dataset("Bathymetry/bathymetry_400m.nc") as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_cartesian(
             nc["X"][:],
             nc["Y"][:],
-            lon=nc["longitude"][:],
-            lat=nc["latitude"][:],
-            H=-1.0 * nc[args.bathymetry_name][:, :],
-            mask=np.where(nc[args.bathymetry_name][...] == 1.0e37, 0, 1),
+            lon=nc["longitude"],
+            lat=nc["latitude"],
+            H=-1.0 * nc["bathymetry"][:, :],
+            mask=np.where(nc["bathymetry"][...] == 1.0e37, 0, 1),
             z0=0.01,
-            #            **final_kwargs,
+            **final_kwargs,
         )
 
     domain.limit_velocity_depth()
@@ -42,18 +57,15 @@ def create_domain(
 
     if rivers:
         river_list = []
-        for river in glob.glob(os.path.join("Rivers", "inflow_q*.nc")):
-            name = os.path.basename(river)
-            name = name.replace("inflow_q_", "").replace(".nc", "")
+        for river in glob.glob("Rivers/inflow_q*.nc"):
+            name = river.replace("Rivers/inflow_q_", "")
+            name = name.replace(".nc", "")
             with netCDF4.Dataset(river) as r:
                 lon = r["lon"][:]
                 lat = r["lat"][:]
                 river_list.append(
                     domain.rivers.add_by_location(
-                        name,
-                        float(lon),
-                        float(lat),
-                        coordinate_type=pygetm.CoordinateType.LONLAT,
+                        name, float(lon), float(lat), spherical=True
                     )
                 )
 
@@ -61,72 +73,59 @@ def create_domain(
 
 
 def create_simulation(
+
     domain: pygetm.domain.Domain,
-    runtype: pygetm.RunType,  # KB
+    runtype: int,
     **kwargs,
 ) -> pygetm.simulation.Simulation:
-    if False:
-        internal_pressure_method = pygetm.internal_pressure.BlumbergMellor()
-    else:
-        internal_pressure = pygetm.internal_pressure.ShchepetkinMcwilliams()
-
-    if False:
-        vertical_coordinates = pygetm.vertical_coordinates.Sigma(nz, ddl=0.75, ddu=0.75)
-    else:
-        vertical_coordinates = pygetm.vertical_coordinates.GVC(
-            nz, ddl=0.75, ddu=0.75, Dgamma=10.0, gamma_surf=True
-        )
-
     final_kwargs = dict(
         advection_scheme=pygetm.AdvectionScheme.SUPERBEE,
         # gotm=os.path.join(setup_dir, "gotmturb.nml"),
         # airsea=airsea,
-        internal_pressure=internal_pressure,
-        vertical_coordinates=vertical_coordinates,
+        internal_pressure_method=pygetm.InternalPressure.SHCHEPETKIN_MCWILLIAMS,
         delay_slow_ip=True,
     )
     final_kwargs.update(kwargs)
-    sim = pygetm.Simulation(
-        domain,
-        runtype=runtype,
-        **final_kwargs,
-    )
+    #sim = pygetm.Simulation(domain, runtype=runtype,fabm="fabm-selma.yaml", **final_kwargs)
+    sim = pygetm.Simulation(domain, runtype=runtype, **final_kwargs)
 
-    if sim.runtype < pygetm.RunType.BAROCLINIC:
+    if sim.runtype < pygetm.BAROCLINIC:
         sim.sst = sim.airsea.t2m
-    if sim.runtype == pygetm.RunType.BAROCLINIC:
-        # sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+    if sim.runtype == pygetm.BAROCLINIC:
+        #sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
         sim.radiation.A.set(0.7)
-        sim.radiation.kc1.set(0.54)  # 1/g1 in gotm
+        sim.radiation.kc1.set(0.54) #1/g1 in gotm
         sim.radiation.kc2.set(3.23)
 
-    if args.initial and sim.runtype == pygetm.RunType.BAROCLINIC:
+    if args.initial and sim.runtype == pygetm.BAROCLINIC:
         if True:
+            # river["salt"].set(0.1)
+            # river["temp"].set(0.5)
             sim.temp.set(16.0)
             sim.salt.set(0.4)
         else:
             sim.salt.set(0.4)
-            # sim.salt.set(
+            #sim.salt.set(
             #    pygetm.input.from_nc(
             #        os.path.join(args.setup_dir, "Input/initial_TS.nc"),
             #        "S",
             #    ),
             #    on_grid=True,
-            # )
-            # sim.salt[...] = np.flip(sim.salt[...], axis=0)
+            #)
+            #sim.salt[...] = np.flip(sim.salt[...], axis=0)
             sim.temp.set(
-                pygetm.input.from_nc(
+                 pygetm.input.from_nc(
                     str(Path(args.setup_dir, "Input/initial_TS.nc")),
                     "Temp",
                 ),
                 on_grid=True,
             )
             sim.temp[...] = np.flip(sim.temp[...], axis=0)
-        sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
-        sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+        sim.temp[..., domain.T.mask == 0] = pygetm.constants.FILL_VALUE
+        sim.salt[..., domain.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.density.convert_ts(sim.salt, sim.temp)
 
-    # sim["diatoms_c"] set(pygetm.input.from_nc("some.nc","dia")) example of initial conditions of diatoms
+    #sim["diatoms_c"] set(pygetm.input.from_nc("some.nc","dia")) example of initial conditions of diatoms
 
     ERA_path = "ERA5/era5_????.nc"
     sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
@@ -138,14 +137,11 @@ def create_simulation(
     ERA_path = "ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
 
-    for river in sim.rivers.values():
-        river.flow.set(pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", "Flow"))
-        river["temp"].set(
-            pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", "Temp")
-        )
-        river["salt"].set(
-            pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", "Salt")
-        )
+    for river in sim.domain.rivers.values():
+        river.flow.set(pygetm.input.from_nc(f"{river.name}.nc", "Flow"))
+        river["temp"].set(pygetm.input.from_nc(f"{river.name}.nc", "Temp"))
+        river["salt"].set(pygetm.input.from_nc(f"{river.name}.nc", "Salt"))
+   
 
     return sim
 
@@ -185,7 +181,7 @@ def create_output(
         # output.request("Du", "Dv", "dpdx", "dpdy", "z0bu", "z0bv", "z0bt")
         # output.request("ru", "rru", "rv", "rrv")
 
-    if sim.runtype > pygetm.RunType.BAROTROPIC_2D:
+    if sim.runtype > pygetm.BAROTROPIC_2D:
         path = Path(output_dir, setup + "_3d.nc")
         output = sim.output_manager.add_netcdf_file(
             str(path),
@@ -196,7 +192,7 @@ def create_output(
     if args.debug_output:
         output.request("fpk", "fqk", "advpk", "advqk")  # 'diffpk', 'diffqk')
 
-    if sim.runtype == pygetm.RunType.BAROCLINIC:
+    if sim.runtype == pygetm.BAROCLINIC:
         output.request("temp", "salt", "rho", "NN", "rad", "sst", "hnt", "nuh")
         if args.debug_output:
             output.request("idpdx", "idpdy")
@@ -219,7 +215,7 @@ def run(
     else:
         sim.start(
             simstart,
-            timestep=timestep,
+            timestep=5.0,
             split_factor=20,
             **kwargs,
         )
@@ -242,21 +238,6 @@ if __name__ == "__main__":
         help="Path to configuration files - not used yet",
         default=".",
     )
-
-    parser.add_argument(
-        "--bathymetry_file",
-        type=str,
-        help="Name of bathymetry file",
-        default="Bathymetry/bathymetry_400m.nc",
-    )
-
-    parser.add_argument(
-        "--bathymetry_name",
-        type=str,
-        help="Name of bathymetry variable",
-        default="bathymetry",
-    )
-
     parser.add_argument(
         "--output_dir", type=str, help="Path to save output files", default="."
     )
@@ -309,7 +290,7 @@ if __name__ == "__main__":
     # for plot options see:
     # https://github.com/BoldingBruggeman/getm-rewrite/blob/fea843cbc78bd7d166bdc5ec71c8d3e3ed080a35/python/pygetm/domain.py#L1943
     if args.plot_domain:
-        f = domain.plot(show_mesh=False, show_subdomains=False)
+        f = domain.plot(show_subdomains=True)
         if f is not None:
             f.savefig("domain_mesh.png")
         f = domain.plot(show_mesh=False, show_mask=True)

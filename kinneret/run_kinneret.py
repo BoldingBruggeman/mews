@@ -11,7 +11,11 @@ import pygetm
 
 setup = "kinneret"
 nz = 30
+ddu = 0.75
+ddl = 0.75
+Dgamma = 10.0
 timestep = 5.0
+use_adaptive = False
 
 
 def create_domain(
@@ -62,20 +66,61 @@ def create_domain(
 
 def create_simulation(
     domain: pygetm.domain.Domain,
-    runtype: pygetm.RunType,  # KB
+    runtype: pygetm.RunType,
     **kwargs,
 ) -> pygetm.simulation.Simulation:
+    global use_adaptive
     if False:
         internal_pressure_method = pygetm.internal_pressure.BlumbergMellor()
     else:
         internal_pressure = pygetm.internal_pressure.ShchepetkinMcwilliams()
 
-    if False:
-        vertical_coordinates = pygetm.vertical_coordinates.Sigma(nz, ddl=0.75, ddu=0.75)
-    else:
+    if True:
         vertical_coordinates = pygetm.vertical_coordinates.GVC(
-            nz, ddl=0.75, ddu=0.75, Dgamma=10.0, gamma_surf=True
+            nz, ddl=ddl, ddu=ddu, Dgamma=Dgamma, gamma_surf=True
         )
+    elif False:
+        try:
+            use_adaptive = True
+            vertical_coordinates = pygetm.vertical_coordinates.Adaptive(
+                nz,
+                timestep,
+                cnpar=1.0,
+                ddu=ddu,
+                ddl=ddl,
+                gamma_surf=True,
+                Dgamma=Dgamma,
+                csigma=0.001,
+                cgvc=-0.001,
+                hpow=3,
+                chsurf=-0.001,
+                hsurf=1.5,
+                chmidd=-0.1,
+                hmidd=0.5,
+                chbott=-0.001,
+                hbott=1.5,
+                cneigh=-0.1,
+                rneigh=0.25,
+                decay=2.0 / 3.0,
+                # cNN=1.0,
+                cNN=0.1,
+                drho=0.2,
+                cSS=-1.0,
+                dvel=0.1,
+                chmin=0.1,
+                hmin=0.5,
+                nvfilter=1,
+                vfilter=0.1,
+                nhfilter=1,
+                hfilter=0.2,
+                split=1,
+                timescale=3.0 * 3600.0,
+            )
+        except:
+            print("Error: can not initialize Adaptive-coordinates")
+            quit()
+    else:
+        vertical_coordinates = pygetm.vertical_coordinates.Sigma(nz, ddl=ddl, ddu=ddu)
 
     final_kwargs = dict(
         advection_scheme=pygetm.AdvectionScheme.SUPERBEE,
@@ -178,7 +223,7 @@ def create_output(
         interval=datetime.timedelta(hours=1),
         sync_interval=None,
     )
-    output.request("zt", "u1", "v1", "tausxu", "tausyv")
+    output.request("Ht", "zt", "u1", "v1", "tausxu", "tausyv")
     if args.debug_output:
         output.request("maskt", "masku", "maskv")
         output.request("U", "V")
@@ -192,7 +237,7 @@ def create_output(
             interval=datetime.timedelta(hours=6),
             sync_interval=None,
         )
-    output.request("uk", "vk", "ww", "SS", "num")
+    output.request("Ht", "uk", "vk", "ww", "SS", "num")
     if args.debug_output:
         output.request("fpk", "fqk", "advpk", "advqk")  # 'diffpk', 'diffqk')
 
@@ -200,6 +245,8 @@ def create_output(
         output.request("temp", "salt", "rho", "NN", "rad", "sst", "hnt", "nuh")
         if args.debug_output:
             output.request("idpdx", "idpdy")
+        if use_adaptive:
+            output.request("nug", "ga", "dga")
 
     if sim.fabm:
         output.request(*sim.fabm.default_outputs)
@@ -225,6 +272,7 @@ def run(
         )
         while sim.time < simstop:
             sim.advance()
+
         sim.finish()
 
 
@@ -333,7 +381,7 @@ if __name__ == "__main__":
         simstart,
         simstop,
         dryrun=args.dryrun,
-        report=datetime.timedelta(hours=6),
+        report=datetime.timedelta(hours=24),
         report_totals=datetime.timedelta(days=7),
         profile=profile,
     )

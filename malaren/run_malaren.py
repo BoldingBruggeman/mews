@@ -3,12 +3,19 @@
 import datetime
 from pathlib import Path
 from typing import Optional
+import numpy as np
 
 import cftime
 
 import pygetm
 
 setup = "malaren"
+nz = 20
+ddu = 0.75
+ddl = 0.75
+Dgamma = 10.0
+timestep = 5.0
+use_adaptive = False
 
 
 def create_domain(
@@ -17,37 +24,19 @@ def create_domain(
     **kwargs,
 ):
     import netCDF4
-    import numpy as np
     import glob
+    import os
 
-    if runtype > pygetm.BAROTROPIC_2D:
-        final_kwargs = dict(
-            nz=20,
-            vertical_coordinate_method=pygetm.VerticalCoordinates.GVC,
-            Dgamma=10.0,
-            ddu=0.75,
-            ddl=0.5,
-            Dmin=0.2,
-            Dcrit=1.0,
-        )
-    else:
-        final_kwargs = dict(
-            nz=1,
-        )
-
-    final_kwargs.update(kwargs)
-
-    with netCDF4.Dataset("Bathymetry/bathymetry.nc") as nc:
+    with netCDF4.Dataset(args.bathymetry_file) as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_cartesian(
             nc["x"][:],
             nc["y"][:],
             lon=nc["lon"],
             lat=nc["lat"],
-            H=nc["bathymetry"][:, :],
-            mask=np.where(nc["bathymetry"][...] == -9999.0, 0, 1),
+            H=nc[args.bathymetry_name][:, :],
+            mask=np.where(nc[args.bathymetry_name][...] == -9999.0, 0, 1),
             z0=0.01,
-            **final_kwargs,
         )
     domain.mask_indices(261, 270 + 1, 43, 43 + 1)
     domain.mask_indices(334, 335 + 1, 49, 63 + 1)
@@ -68,7 +57,10 @@ def create_domain(
                 lat = r["lat"][:]
                 river_list.append(
                     domain.rivers.add_by_location(
-                        name, float(lon), float(lat), spherical=True
+                        name,
+                        float(lon),
+                        float(lat),
+                        coordinate_type=pygetm.CoordinateType.LONLAT,
                     )
                 )
         
@@ -91,25 +83,79 @@ def create_domain(
 
 def create_simulation(
     domain: pygetm.domain.Domain,
-    runtype: int,
+    runtype: pygetm.RunType,
     **kwargs,
 ) -> pygetm.simulation.Simulation:
+    global use_adaptive
+    if False:
+        internal_pressure_method = pygetm.internal_pressure.BlumbergMellor()
+    else:
+        internal_pressure = pygetm.internal_pressure.ShchepetkinMcwilliams()
+
+    if True:
+        vertical_coordinates = pygetm.vertical_coordinates.GVC(
+            nz, ddl=ddl, ddu=ddu, Dgamma=Dgamma, gamma_surf=True
+        )
+    elif False:
+        try:
+            use_adaptive = True
+            vertical_coordinates = pygetm.vertical_coordinates.Adaptive(
+                nz,
+                timestep,
+                cnpar=1.0,
+                ddu=ddu,
+                ddl=ddl,
+                gamma_surf=True,
+                Dgamma=Dgamma,
+                csigma=0.001,
+                cgvc=-0.001,
+                hpow=3,
+                chsurf=-0.001,
+                hsurf=1.5,
+                chmidd=-0.1,
+                hmidd=0.5,
+                chbott=-0.001,
+                hbott=1.5,
+                cneigh=-0.1,
+                rneigh=0.25,
+                decay=2.0 / 3.0,
+                # cNN=1.0,
+                cNN=0.1,
+                drho=0.2,
+                cSS=-1.0,
+                dvel=0.1,
+                chmin=0.1,
+                hmin=0.5,
+                nvfilter=1,
+                vfilter=0.1,
+                nhfilter=1,
+                hfilter=0.2,
+                split=1,
+                timescale=3.0 * 3600.0,
+            )
+        except:
+            print("Error: can not initialize Adaptive-coordinates")
+            quit()
+    else:
+        vertical_coordinates = pygetm.vertical_coordinates.Sigma(nz, ddl=ddl, ddu=ddu)
+
     final_kwargs = dict(
         advection_scheme=pygetm.AdvectionScheme.SUPERBEE,
         # gotm=os.path.join(setup_dir, "gotmturb.nml"),
         # airsea=airsea,
-        internal_pressure_method=pygetm.InternalPressure.SHCHEPETKIN_MCWILLIAMS,
+        internal_pressure=internal_pressure,
+        vertical_coordinates=vertical_coordinates,
         delay_slow_ip=True,
     )
     final_kwargs.update(kwargs)
     sim = pygetm.Simulation(domain, runtype=runtype, fabm = "fabm-selma.yaml", **final_kwargs)
 
-    if sim.runtype < pygetm.BAROCLINIC:
+    if sim.runtype < pygetm.RunType.BAROCLINIC:
         sim.sst = sim.airsea.t2m
-    if sim.runtype == pygetm.BAROCLINIC:
+    if sim.runtype == pygetm.RunType.BAROCLINIC:
         sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
 
-    if args.initial and sim.runtype == pygetm.BAROCLINIC:
+    if args.initial and sim.runtype == pygetm.RunType.BAROCLINIC:
         if True:
             print("egon")
             # river["salt"].set(0.1)
@@ -181,28 +227,30 @@ def create_output(
         interval=datetime.timedelta(days=7),
         sync_interval=None,
     )
-    output.request("zt", "u1", "v1", "tausxu", "tausyv")
+    output.request("Ht", "zt", "u1", "v1", "tausxu", "tausyv")
     if args.debug_output:
         output.request("maskt", "masku", "maskv")
         output.request("U", "V")
         # output.request("Du", "Dv", "dpdx", "dpdy", "z0bu", "z0bv", "z0bt")
         # output.request("ru", "rru", "rv", "rrv")
 
-    if sim.runtype > pygetm.BAROTROPIC_2D:
+    if sim.runtype > pygetm.RunType.BAROTROPIC_2D:
         path = Path(output_dir, setup + "_3d.nc")
         output = sim.output_manager.add_netcdf_file(
             str(path),
             interval=datetime.timedelta(days=7),
             sync_interval=None,
         )
-    output.request("uk", "vk", "ww", "SS", "num")
+    output.request("Ht", "uk", "vk", "ww", "SS", "num")
     if args.debug_output:
         output.request("fpk", "fqk", "advpk", "advqk")  # 'diffpk', 'diffqk')
 
-    if sim.runtype == pygetm.BAROCLINIC:
+    if sim.runtype == pygetm.RunType.BAROCLINIC:
         output.request("temp", "salt", "rho", "NN", "rad", "sst", "hnt", "nuh")
         if args.debug_output:
             output.request("idpdx", "idpdy")
+        if use_adaptive:
+            output.request("nug", "ga", "dga")
 
     if sim.fabm:
         output.request("pfas_c", "selma_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
@@ -222,7 +270,7 @@ def run(
     else:
         sim.start(
             simstart,
-            timestep=5.0,
+            timestep=timestep,
             split_factor=20,
             **kwargs,
         )
@@ -245,6 +293,21 @@ if __name__ == "__main__":
         help="Path to configuration files - not used yet",
         default=".",
     )
+
+    parser.add_argument(
+        "--bathymetry_file",
+        type=str,
+        help="Name of bathymetry file",
+        default="Bathymetry/bathymetry.nc",
+    )
+
+    parser.add_argument(
+        "--bathymetry_name",
+        type=str,
+        help="Name of bathymetry variable",
+        default="bathymetry",
+    )
+
     parser.add_argument(
         "--output_dir", type=str, help="Path to save output files", default="."
     )
@@ -262,7 +325,7 @@ if __name__ == "__main__":
         default=pygetm.BAROCLINIC,
     )
     parser.add_argument(
-        "--no_rivers", action="store_false", dest="rivers", help="No river input"    
+        "--no_rivers", action="store_false", dest="rivers", help="No river input"
     )
     parser.add_argument(
         "--no_output",
@@ -312,7 +375,7 @@ if __name__ == "__main__":
     # for plot options see:
     # https://github.com/BoldingBruggeman/getm-rewrite/blob/fea843cbc78bd7d166bdc5ec71c8d3e3ed080a35/python/pygetm/domain.py#L1943
     if args.plot_domain:
-        f = domain.plot(show_subdomains = True)
+        f = domain.plot(show_mesh=False, show_subdomains=False)
         if f is not None:
             f.savefig("domain_mesh.png")
         f = domain.plot(show_mesh=False, show_mask=True)

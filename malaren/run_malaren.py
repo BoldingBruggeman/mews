@@ -60,7 +60,7 @@ def create_domain(
                         name,
                         float(lon),
                         float(lat),
-                        coordinate_type=pygetm.CoordinateType.LONLAT,
+                        coordinate_type=pygetm.CoordinateType.LONLAT
                     )
                 )
         
@@ -74,7 +74,7 @@ def create_domain(
                 lat = r["lat"][:]
                 river_list.append(
                     domain.rivers.add_by_location(
-                        name, float(lon), float(lat), spherical=True
+                        name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
                     )
                 )
 
@@ -161,7 +161,7 @@ def create_simulation(
             # river["salt"].set(0.1)
             # river["temp"].set(0.5)
         else:
-            print("Read froom files")
+            print("Read from files")
             # sim.salt.set(
             # pygetm.input.from_nc(
             #    os.path.join(args.setup_dir, "Input/initialConditions.nc"), "salt"
@@ -187,12 +187,22 @@ def create_simulation(
     
     for river in sim.domain.rivers.values():
         if "outflow" in river.name:
-            # Outflow
+            ### Outflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/{river.name}_q.nc", river.name))
         else:
-            # Inflow
-            river.flow.set(pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", river.name)) # .mean() ## Error here if I remove .mean()
+            ### Inflow
+            river.flow.set(pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", river.name))
             river["pfas_c"].set(1.0)
+            
+            # Nutrients
+            river["selma_po"].follow_target_cell = False #(True makes it use the value from the basin)
+            river["selma_po"].set(0.1937359)
+            river["selma_aa"].follow_target_cell = False
+            river["selma_aa"].set(3.5688794)
+            river["selma_nn"].follow_target_cell = False
+            river["selma_nn"].set(7.1377587)
+            river["selma_dd"].follow_target_cell = False
+            river["selma_dd"].set(60.6709493)
     
     # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     
@@ -389,7 +399,7 @@ if __name__ == "__main__":
         sim.output_manager.add_restart(args.save_restart)
 
     if args.load_restart and not args.dryrun:
-        simstart = sim.load_restart(args.load_restart)
+        simstart = sim.load_restart(args.load_restart) # Old: , decode_timedelta=False) # decode_timedelta=False is to avoid problems with age_of_water
 
     simstart = datetime.datetime.strptime(args.start, "%Y-%m-%d %H:%M:%S")
     simstop = datetime.datetime.strptime(args.stop, "%Y-%m-%d %H:%M:%S")

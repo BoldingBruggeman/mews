@@ -75,11 +75,11 @@ def create_simulation(
     else:
         internal_pressure = pygetm.internal_pressure.ShchepetkinMcwilliams()
 
-    if True:
+    if False:
         vertical_coordinates = pygetm.vertical_coordinates.GVC(
             nz, ddl=ddl, ddu=ddu, Dgamma=Dgamma, gamma_surf=True
         )
-    elif False:
+    elif True:
         try:
             use_adaptive = True
             vertical_coordinates = pygetm.vertical_coordinates.Adaptive(
@@ -93,18 +93,18 @@ def create_simulation(
                 csigma=0.001,
                 cgvc=-0.001,
                 hpow=3,
-                chsurf=-0.001,
-                hsurf=1.5,
+                chsurf=0.001,
+                hsurf=1.0,
                 chmidd=-0.1,
                 hmidd=0.5,
                 chbott=-0.001,
                 hbott=1.5,
-                cneigh=-0.1,
+                cneigh=0.001,
                 rneigh=0.25,
                 decay=2.0 / 3.0,
                 # cNN=1.0,
-                cNN=0.1,
-                drho=0.2,
+                cNN=0.05,
+                drho=0.5,
                 cSS=-1.0,
                 dvel=0.1,
                 chmin=0.1,
@@ -145,7 +145,7 @@ def create_simulation(
         sim.radiation.kc1.set(0.54)  # 1/g1 in gotm
         sim.radiation.kc2.set(3.23)
 
-    if args.initial and sim.runtype == pygetm.RunType.BAROCLINIC:
+    if not args.load_restart and sim.runtype == pygetm.RunType.BAROCLINIC:
         if True:
             sim.temp.set(16.0)
             sim.salt.set(0.4)
@@ -220,10 +220,10 @@ def create_output(
     path = Path(output_dir, setup + "_2d.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
-        interval=datetime.timedelta(hours=1),
+        interval=datetime.timedelta(hours=6),
         sync_interval=None,
     )
-    output.request("Ht", "zt", "u1", "v1", "tausxu", "tausyv")
+    output.request("Ht", "zt", "Dt", "u1", "v1", "tausxu", "tausyv")
     if args.debug_output:
         output.request("maskt", "masku", "maskv")
         output.request("U", "V")
@@ -234,7 +234,7 @@ def create_output(
         path = Path(output_dir, setup + "_3d.nc")
         output = sim.output_manager.add_netcdf_file(
             str(path),
-            interval=datetime.timedelta(hours=6),
+            interval=datetime.timedelta(hours=24),
             sync_interval=None,
         )
     output.request("Ht", "uk", "vk", "ww", "SS", "num")
@@ -309,11 +309,6 @@ if __name__ == "__main__":
         "--output_dir", type=str, help="Path to save output files", default="."
     )
 
-    parser.add_argument(
-        "--initial",
-        action="store_true",
-        help="Initial run salinity and temerature are specified",
-    )
     parser.add_argument(
         "--runtype",
         type=int,

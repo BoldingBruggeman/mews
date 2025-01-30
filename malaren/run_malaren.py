@@ -182,7 +182,7 @@ def create_simulation(
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
     
     
-    for river in sim.domain.rivers.values():
+    for river in sim.rivers.values():
         if "outflow" in river.name:
             ### Outflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/{river.name}_q.nc", river.name))

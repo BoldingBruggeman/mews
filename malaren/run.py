@@ -11,7 +11,7 @@ stop_date = date(1995, 3, 1)
 
 setup = "malaren"
 script = "run_malaren.py"
-np = 6
+np = 25
 
 start = date(1995, 1, 1)
 start = start_date
@@ -50,12 +50,13 @@ while start < stop_date:
     else:
         p.mkdir(parents=True)
     
-    # subprocess.run(command, shell=True)
+    # command.extend(["--output_dir", "x"])
+    command.extend([f"--output_dir", f"{x}"])
     
-    command.extend(["--output_dir", "x"])
+    subprocess.run(command, shell=True)
     
-    if True:
-        print(command)
-    else:
-        subprocess.run(command)
+    # if True:
+        # print(command)
+    # else:
+        # subprocess.run(command)
     start = stop

@@ -9,14 +9,14 @@ import cftime
 
 import pygetm
 
-setup = "malaren"
+setup = "ekoln"
 nz = 20
 ddu = 0.75
 ddl = 0.75
 Dgamma = 10.0
 timestep = 5.0
 use_adaptive = False
-
+bathy_name = "Bathymetry/central_Ekoln_bathymetry.nc"
 
 def create_domain(
     runtype: int,
@@ -27,7 +27,7 @@ def create_domain(
     import glob
     import os
 
-    with netCDF4.Dataset(args.bathymetry_file) as nc:
+    with netCDF4.Dataset(bathy_name) as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_cartesian(
             nc["x"][:],
@@ -38,14 +38,11 @@ def create_domain(
             mask=np.where(nc[args.bathymetry_name][...] == -9999.0, 0, 1),
             z0=0.01,
         )
-    domain.mask_indices(261, 270 + 1, 43, 43 + 1)
-    domain.mask_indices(334, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(335, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(304, 304 + 1, 38, 44 + 1)
+    
 
     domain.limit_velocity_depth()
     domain.cfl_check()
-
+    
     if rivers:
         river_list = []
         # Inflows
@@ -138,7 +135,7 @@ def create_simulation(
             quit()
     else:
         vertical_coordinates = pygetm.vertical_coordinates.Sigma(nz, ddl=ddl, ddu=ddu)
-
+    
     final_kwargs = dict(
         advection_scheme=pygetm.AdvectionScheme.SUPERBEE,
         # gotm=os.path.join(setup_dir, "gotmturb.nml"),
@@ -171,16 +168,15 @@ def create_simulation(
         sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
 
-    ERA_path = "ERA5/era5_????.nc"
+    ERA_path = "../ERA5/era5_????.nc"
     sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
     sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10"))
     sim.airsea.t2m.set(pygetm.input.from_nc(ERA_path, "t2m") - 273.15)
     sim.airsea.d2m.set(pygetm.input.from_nc(ERA_path, "d2m") - 273.15)
     sim.airsea.sp.set(pygetm.input.from_nc(ERA_path, "sp"))
     sim.airsea.tcc.set(pygetm.input.from_nc(ERA_path, "tcc"))
-    ERA_path = "ERA5/precip_????.nc"
+    ERA_path = "../ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
-    
     
     for river in sim.rivers.values():
         if "outflow" in river.name:
@@ -204,7 +200,6 @@ def create_simulation(
     # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     
     return sim
-
 
 def create_output(
     output_dir: str,

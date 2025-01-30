@@ -36,7 +36,7 @@ while start < stop_date:
     x = start.strftime("%Y%m%d")
     y = stop.strftime("%Y%m%d")
     if start == start_date:
-        command.extend(["--initial"])
+        print("Initial simulation")
     else:
         command.extend([f"--load_restart", f"restart_{setup}_{x}.nc"])
     

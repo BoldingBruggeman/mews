@@ -138,11 +138,10 @@ def create_simulation(
     if sim.runtype == pygetm.RunType.BAROCLINIC:
         sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
 
-    if args.initial and sim.runtype == pygetm.RunType.BAROCLINIC:
+    if not args.load_restart and sim.runtype == pygetm.RunType.BAROCLINIC:
         if True:
-            print("egon")
-            # river["salt"].set(0.1)
-            # river["temp"].set(0.5)
+           sim.temp.set(2)
+           sim.salt.set(0.1)
         else:
             print("Read froom files")
             # sim.salt.set(
@@ -151,8 +150,6 @@ def create_simulation(
             # ),
             # on_grid=True,
         # )
-        sim.temp.set(2)
-        sim.salt.set(0.1)
         sim.density.convert_ts(sim.salt, sim.temp)
         sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE

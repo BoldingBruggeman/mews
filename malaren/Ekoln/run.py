@@ -11,28 +11,37 @@ stop_date = date(1995, 3, 31)
 
 setup = "ekoln"
 script = "run_ekoln.py"
-np = 16
+np = 6
 
 start = date(1995, 1, 1)
 start = start_date
 
 while start < stop_date:
+    command = [
+        "mpiexec",
+        "-n",
+        str(np),
+        "python",
+        script,
+    ]
+    
     days_in_month = calendar.monthrange(start.year, start.month)[1]
     stop = start + timedelta(days=days_in_month)
     x = start.strftime("%Y-%m-%d %H:%M:%S")
     y = stop.strftime("%Y-%m-%d %H:%M:%S")
     print(f"Simulation from {x} to {y}")
-
+    
+    command.extend([x, y])
+    
     x = start.strftime("%Y%m%d")
     y = stop.strftime("%Y%m%d")
     if start == start_date:
-        option = "--initial"
-        restart_in = ""
+        print("Initial simulation")
     else:
-        option = ""
-        restart_in = f"--load_restart restart_{setup}_{x}.nc"
-
-    restart_out = f"--save_restart restart_{setup}_{y}.nc"
+        command.extend([f"--load_restart", f"restart_{setup}_{x}.nc"])
+    
+    
+    command.extend([f"--save_restart", f"restart_{setup}_{y}.nc"])
 
     p = Path(x)
     if p.is_dir():
@@ -40,24 +49,14 @@ while start < stop_date:
         exit()
     else:
         p.mkdir(parents=True)
-    output_dir = f"--output_dir {x}"
-
-    command = 'mpiexec -np %d python %s "%s" "%s" %s %s %s %s' % (
-        np,
-        script,
-        start.strftime("%Y-%m-%d %H:%M:%S"),
-        stop.strftime("%Y-%m-%d %H:%M:%S"),
-        option,
-        restart_in,
-        restart_out,
-        output_dir,
-    )
     
-    # Full command to run inside Anaconda
-    # full_command = f'cmd.exe /K "{activate_script} && conda activate {env_name} && {command}"'
+    # command.extend(["--output_dir", "x"])
+    command.extend([f"--output_dir", f"{x}"])
     
     subprocess.run(command, shell=True)
-    # subprocess.run(full_command, shell=True)
-    # subprocess.run(["mv", "getm-\*.log", x])
-
+    
+    # if True:
+        # print(command)
+    # else:
+        # subprocess.run(command)
     start = stop

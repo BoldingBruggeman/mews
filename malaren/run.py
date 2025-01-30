@@ -7,7 +7,7 @@ import subprocess
 
 start_date = date(1995, 1, 1)
 # stop_date = date(2022, 4, 1)
-stop_date = date(1995, 3, 1)
+stop_date = date(1995, 3, 31)
 
 setup = "malaren"
 script = "run_malaren.py"

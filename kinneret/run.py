@@ -51,7 +51,7 @@ while start < stop_date:
     else:
         p.mkdir(parents=True)
 
-    command.extend(["--output_dir", "x"])
+    command.extend([f"--output_dir", f"{x}"])
 
     if True:
         print(command)

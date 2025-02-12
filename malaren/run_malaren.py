@@ -63,7 +63,6 @@ def create_domain(
                         coordinate_type=pygetm.CoordinateType.LONLAT
                     )
                 )
-        
         # Outflows
         for river in glob.glob("Rivers/Outflow_file*.nc"):
             name = os.path.basename(river)
@@ -179,8 +178,6 @@ def create_simulation(
     sim.airsea.tcc.set(pygetm.input.from_nc(ERA_path, "tcc"))
     ERA_path = "ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
-    
-    
     for river in sim.rivers.values():
         if "outflow" in river.name:
             ### Outflow

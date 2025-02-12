@@ -46,9 +46,9 @@ def create_domain(
     if rivers:
         river_list = []
         # Inflows
-        for river in glob.glob("Rivers/inflow_q*.nc"):
-            #name = river.replace("Rivers/inflow_q_", "")
-            name = river.split('_')[-1][:-3]
+        for river in glob.glob("Rivers/Inflow_file*.nc"):
+            name = os.path.basename(river)
+            name = name.replace("Inflow_file_", "").replace(".nc", "")
             with netCDF4.Dataset(river) as r:
                 lon = r["lon"][:]
                 lat = r["lat"][:]
@@ -62,10 +62,9 @@ def create_domain(
                 )
         
         # Outflows
-        for river in glob.glob("Rivers/outflow*_q.nc"):
-            #name = river.replace("Rivers/inflow_q_", "")
-            name = river.split('\\')[1]
-            name = name.replace("_q.nc", "")
+        for river in glob.glob("Rivers/Outflow_file*.nc"):
+            name = os.path.basename(river)
+            name = name.replace("Outflow_file_", "").replace(".nc", "")
             with netCDF4.Dataset(river) as r:
                 lon = r["lon"][:]
                 lat = r["lat"][:]
@@ -145,7 +144,7 @@ def create_simulation(
         delay_slow_ip=True,
     )
     final_kwargs.update(kwargs)
-    sim = pygetm.Simulation(domain, runtype=runtype, fabm = "fabm-selma.yaml", **final_kwargs)
+    sim = pygetm.Simulation(domain, runtype=runtype, fabm = "fabm-selmaprotbas.yaml", **final_kwargs)
 
     if sim.runtype < pygetm.RunType.BAROCLINIC:
         sim.sst = sim.airsea.t2m
@@ -181,21 +180,25 @@ def create_simulation(
     for river in sim.rivers.values():
         if "outflow" in river.name:
             ### Outflow
-            river.flow.set(pygetm.input.from_nc(f"Rivers/{river.name}_q.nc", river.name))
+            river.flow.set(pygetm.input.from_nc(f"Rivers/Outflow_file_{river.name}.nc", "q"))
         else:
             ### Inflow
-            river.flow.set(pygetm.input.from_nc(f"Rivers/inflow_q_{river.name}.nc", river.name))
+            river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "q"))
             river["pfas_c"].set(1.0)
             
             # Nutrients
-            river["selma_po"].follow_target_cell = False #(True makes it use the value from the basin)
-            river["selma_po"].set(0.1937359)
-            river["selma_aa"].follow_target_cell = False
-            river["selma_aa"].set(3.5688794)
-            river["selma_nn"].follow_target_cell = False
-            river["selma_nn"].set(7.1377587)
-            river["selma_dd"].follow_target_cell = False
-            river["selma_dd"].set(60.6709493)
+            river["selmaprotbas_po"].follow_target_cell = False #(True makes it use the value from the basin)
+            river["selmaprotbas_po"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "PO4"))
+            river["selmaprotbas_aa"].follow_target_cell = False
+            river["selmaprotbas_aa"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "NH4"))
+            river["selmaprotbas_nn"].follow_target_cell = False
+            river["selmaprotbas_nn"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "NO3"))
+            river["selmaprotbas_si"].follow_target_cell = False
+            river["selmaprotbas_si"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "Si"))
+            river["selmaprotbas_dd_n"].follow_target_cell = False
+            river["selmaprotbas_dd_n"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n"))
+            river["selmaprotbas_dd_p"].follow_target_cell = False
+            river["selmaprotbas_dd_p"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_p"))             
     
     # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     
@@ -255,7 +258,7 @@ def create_output(
             output.request("nug", "ga", "dga")
 
     if sim.fabm:
-        output.request("pfas_c", "selma_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
+        output.request("pfas_c", "selmaprotbas_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
 
 
 def run(

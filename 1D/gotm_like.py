@@ -5,11 +5,33 @@ import numpy as np
 import pygetm
 import pygetm.input.igotm
 
-# setup specifics - these corresponds to Lake Ekoln
-lon, lat, depth = 17.61, 59.75, 30.0
-timestep, split_factor = 360.0, 10
-tinit = 0.1
-sinit = 0.1
+setup = "ohra"
+setup = "kinneret"
+setup = "ekoln"
+
+# setup specifics
+if setup == "ekoln":
+    lon, lat, depth = 17.61, 59.75, 30.0
+    timestep, split_factor = 360.0, 10
+    tinit = 0.1
+    sinit = 0.1
+    output = "ekoln.nc"
+
+if setup == "kinneret":
+    lon, lat, depth = 35.6, 32.8, 45.0
+    timestep, split_factor = 360.0, 10
+    tinit = 16.0
+    sinit = 0.1
+    output = "kinneret.nc"
+
+if setup == "ohra":
+    lon, lat, depth = 10.7, 50.76, 42.0
+    timestep, split_factor = 360.0, 10
+    tinit = 0.1
+    sinit = 0.1
+    output = "ohra.nc"
+
+
 jerlov = True
 if jerlov:
     jerlov_type = pygetm.Jerlov.Type_III
@@ -71,7 +93,7 @@ sim.temp.set(tinit)
 sim.salt.set(sinit)
 
 out = sim.output_manager.add_netcdf_file(
-    "test.nc",
+    output,
     interval=datetime.timedelta(hours=1),
     sync_interval=None,
 )

@@ -16,6 +16,7 @@ ddl = 0.75
 Dgamma = 10.0
 timestep = 5.0
 use_adaptive = False
+use_tracers = False
 bathy_name = "Bathymetry/central_Ekoln_bathymetry.nc"
 
 def create_domain(
@@ -73,6 +74,19 @@ def create_domain(
                         name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
                     )
                 )
+        # Tracers
+        if use_tracers and os.path.isdir("Tracers"):
+            for tracer_file in glob.glob("Tracers/*.nc"):
+                name = os.path.basename(tracer_file)
+                name = name.replace("Tracer_file_", "nctracer_").replace(".nc", "")
+                with netCDF4.Dataset(tracer_file) as r:
+                    lon = r["lon"][:]
+                    lat = r["lat"][:]
+                    river_list.append(
+                        domain.rivers.add_by_location(
+                            name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
+                        )
+                    )
 
     return domain
 
@@ -181,6 +195,19 @@ def create_simulation(
         if "outflow" in river.name:
             ### Outflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Outflow_file_{river.name}.nc", "q"))
+        elif "nctracer_" in river.name:
+            ### Tracer
+            filename_tracer = river.name.replace("nctracer_", "")
+            river.flow.set(pygetm.input.from_nc(f"Tracers/Tracer_file_{filename_tracer}.nc", "flow"))
+
+            ncfile = netCDF4.Dataset(f"Tracers/Tracer_file_{filename_tracer}.nc")
+            tracer_names = np.array(list(ncfile.variables.keys()))
+            tracer_names = tracer_names[~np.isin(tracer_names, ["lon", "lat", "time", "flow"])]
+
+            for trc in tracer_names:
+                river[trc].set(pygetm.input.from_nc(f"Tracers/Tracer_file_{filename_tracer}.nc", trc))
+
+            ncfile.close()
         else:
             ### Inflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "q"))

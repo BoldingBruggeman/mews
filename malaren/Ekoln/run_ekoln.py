@@ -18,6 +18,16 @@ timestep = 5.0
 use_adaptive = False
 use_tracers = False
 bathy_name = "Bathymetry/central_Ekoln_bathymetry.nc"
+depth_name = "bathy_smooth_fixedpoints"
+
+# Met scaling
+scl_wind = 1.0 # Multiply this number by u10 and v10
+
+# Light extinction
+light_A = 0.58 # non-visible fraction of shortwave radiation (-)
+light_kc1 = 2.5 # attenuation of non-visible fraction of shortwave radiation (m-1)
+light_kc2 = 1.0 # attenuation of visible fraction of shortwave radiation (m-1)
+
 
 def create_domain(
     runtype: int,
@@ -35,8 +45,8 @@ def create_domain(
             nc["y"][:],
             lon=nc["lon"],
             lat=nc["lat"],
-            H=nc[args.bathymetry_name][:, :],
-            mask=np.where(nc[args.bathymetry_name][...] == -9999.0, 0, 1),
+            H=nc[depth_name][:, :],
+            mask=np.where(nc[depth_name][...] == -9999.0, 0, 1),
             z0=0.01,
         )
     
@@ -164,6 +174,10 @@ def create_simulation(
         sim.sst = sim.airsea.t2m
     if sim.runtype == pygetm.RunType.BAROCLINIC:
         sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        # Overwrite Jerlov type by user settings
+        sim.radiation.A.fill(light_A)
+        sim.radiation.kc1.fill(light_kc1)
+        sim.radiation.kc2.fill(light_kc2)
 
     if not args.load_restart and sim.runtype == pygetm.RunType.BAROCLINIC:
         if True:
@@ -182,8 +196,8 @@ def create_simulation(
         sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
 
     ERA_path = "../ERA5/era5_????.nc"
-    sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
-    sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10"))
+    sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10") * scl_wind)
+    sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10") * scl_wind)
     sim.airsea.t2m.set(pygetm.input.from_nc(ERA_path, "t2m") - 273.15)
     sim.airsea.d2m.set(pygetm.input.from_nc(ERA_path, "d2m") - 273.15)
     sim.airsea.sp.set(pygetm.input.from_nc(ERA_path, "sp"))
@@ -213,6 +227,12 @@ def create_simulation(
             river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "q"))
             river["pfas_c"].set(1.0)
             
+            # Temperature and oxygen
+            river["temp"].follow_target_cell = False
+            river["temp"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "temp"))
+            river["selmaprotbas_o2"].follow_target_cell = False
+            river["selmaprotbas_o2"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "o2"))
+            
             # Nutrients
             river["selmaprotbas_po"].follow_target_cell = False #(True makes it use the value from the basin)
             river["selmaprotbas_po"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "PO4"))
@@ -222,6 +242,8 @@ def create_simulation(
             river["selmaprotbas_nn"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "NO3"))
             river["selmaprotbas_si"].follow_target_cell = False
             river["selmaprotbas_si"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "Si"))
+            river["selmaprotbas_dd_c"].follow_target_cell = False
+            river["selmaprotbas_dd_c"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n") * 6.625) # N input adjusted with Redfield ratio
             river["selmaprotbas_dd_n"].follow_target_cell = False
             river["selmaprotbas_dd_n"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n"))
             river["selmaprotbas_dd_p"].follow_target_cell = False
@@ -285,7 +307,7 @@ def create_output(
             output.request("nug", "ga", "dga")
 
     if sim.fabm:
-        output.request("pfas_c", "selmaprotbas_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
+        output.request("selmaprotbas_o2", "selmaprotbas_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
 
 
 def run(

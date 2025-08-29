@@ -40,6 +40,8 @@ while start < stop_date:
     
     
     command.extend([f"--save_restart", f"restart_{setup}_{y}.nc"])
+    
+    # command.extend(["--plot_domain"]) # In case you want to plot the subdomains and simulated river entry points
 
     p = Path(x)
     if p.is_dir():

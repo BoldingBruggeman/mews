@@ -16,7 +16,17 @@ ddl = 0.75
 Dgamma = 10.0
 timestep = 5.0
 use_adaptive = False
+use_tracers = False
+bathy_name = "Bathymetry/bathymetry.nc"
+depth_name = "bathy_smooth_fixedpoints"
 
+# Met scaling
+scl_wind = 1.0 # Multiply this number by u10 and v10
+
+# Light extinction
+light_A = 0.58 # non-visible fraction of shortwave radiation (-)
+light_kc1 = 2.5 # attenuation of non-visible fraction of shortwave radiation (m-1)
+light_kc2 = 1.0 # attenuation of visible fraction of shortwave radiation (m-1)
 
 def create_domain(
     runtype: int,
@@ -27,21 +37,21 @@ def create_domain(
     import glob
     import os
 
-    with netCDF4.Dataset(args.bathymetry_file) as nc:
+    with netCDF4.Dataset(bathy_name) as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_cartesian(
             nc["x"][:],
             nc["y"][:],
             lon=nc["lon"],
             lat=nc["lat"],
-            H=nc[args.bathymetry_name][:, :],
-            mask=np.where(nc[args.bathymetry_name][...] == -9999.0, 0, 1),
+            H=nc[depth_name][:, :],
+            mask=np.where(nc[depth_name][...] == -9999.0, 0, 1),
             z0=0.01,
         )
-    domain.mask_indices(261, 270 + 1, 43, 43 + 1)
-    domain.mask_indices(334, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(335, 335 + 1, 49, 63 + 1)
-    domain.mask_indices(304, 304 + 1, 38, 44 + 1)
+    # domain.mask_indices(261, 270 + 1, 43, 43 + 1)
+    # domain.mask_indices(334, 335 + 1, 49, 63 + 1)
+    # domain.mask_indices(335, 335 + 1, 49, 63 + 1)
+    # domain.mask_indices(304, 304 + 1, 38, 44 + 1)
 
     domain.limit_velocity_depth()
     domain.cfl_check()
@@ -75,6 +85,19 @@ def create_domain(
                         name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
                     )
                 )
+        # Tracers
+        if use_tracers and os.path.isdir("Tracers"):
+            for tracer_file in glob.glob("Tracers/*.nc"):
+                name = os.path.basename(tracer_file)
+                name = name.replace("Tracer_file_", "nctracer_").replace(".nc", "")
+                with netCDF4.Dataset(tracer_file) as r:
+                    lon = r["lon"][:]
+                    lat = r["lat"][:]
+                    river_list.append(
+                        domain.rivers.add_by_location(
+                            name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
+                        )
+                    )
 
     return domain
 
@@ -84,6 +107,8 @@ def create_simulation(
     runtype: pygetm.RunType,
     **kwargs,
 ) -> pygetm.simulation.Simulation:
+    import netCDF4
+    import numpy as np
     global use_adaptive
     if False:
         internal_pressure_method = pygetm.internal_pressure.BlumbergMellor()
@@ -152,6 +177,10 @@ def create_simulation(
         sim.sst = sim.airsea.t2m
     if sim.runtype == pygetm.RunType.BAROCLINIC:
         sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        # Overwrite Jerlov type by user settings
+        sim.radiation.A.fill(light_A)
+        sim.radiation.kc1.fill(light_kc1)
+        sim.radiation.kc2.fill(light_kc2)
 
     if not args.load_restart and sim.runtype == pygetm.RunType.BAROCLINIC:
         if True:
@@ -170,8 +199,8 @@ def create_simulation(
         sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
 
     ERA_path = "ERA5/era5_????.nc"
-    sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
-    sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10"))
+    sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10") * scl_wind)
+    sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10") * scl_wind)
     sim.airsea.t2m.set(pygetm.input.from_nc(ERA_path, "t2m") - 273.15)
     sim.airsea.d2m.set(pygetm.input.from_nc(ERA_path, "d2m") - 273.15)
     sim.airsea.sp.set(pygetm.input.from_nc(ERA_path, "sp"))
@@ -182,10 +211,29 @@ def create_simulation(
         if "outflow" in river.name:
             ### Outflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Outflow_file_{river.name}.nc", "q"))
+        elif "nctracer_" in river.name:
+            ### Tracer
+            filename_tracer = river.name.replace("nctracer_", "")
+            river.flow.set(pygetm.input.from_nc(f"Tracers/Tracer_file_{filename_tracer}.nc", "flow"))
+
+            ncfile = netCDF4.Dataset(f"Tracers/Tracer_file_{filename_tracer}.nc")
+            tracer_names = np.array(list(ncfile.variables.keys()))
+            tracer_names = tracer_names[~np.isin(tracer_names, ["lon", "lat", "time", "flow"])]
+
+            for trc in tracer_names:
+                river[trc].set(pygetm.input.from_nc(f"Tracers/Tracer_file_{filename_tracer}.nc", trc))
+
+            ncfile.close()
         else:
             ### Inflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "q"))
-            river["pfas_c"].set(1.0)
+            river["pfas_c"].set(0.0)
+            
+            # Temperature and oxygen
+            river["temp"].follow_target_cell = False
+            river["temp"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "temp"))
+            river["selmaprotbas_o2"].follow_target_cell = False
+            river["selmaprotbas_o2"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "o2"))
             
             # Nutrients
             river["selmaprotbas_po"].follow_target_cell = False #(True makes it use the value from the basin)
@@ -196,6 +244,8 @@ def create_simulation(
             river["selmaprotbas_nn"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "NO3"))
             river["selmaprotbas_si"].follow_target_cell = False
             river["selmaprotbas_si"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "Si"))
+            river["selmaprotbas_dd_c"].follow_target_cell = False
+            river["selmaprotbas_dd_c"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n") * 6.625) # N input adjusted with Redfield ratio
             river["selmaprotbas_dd_n"].follow_target_cell = False
             river["selmaprotbas_dd_n"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n"))
             river["selmaprotbas_dd_p"].follow_target_cell = False
@@ -377,7 +427,7 @@ if __name__ == "__main__":
     # for plot options see:
     # https://github.com/BoldingBruggeman/getm-rewrite/blob/fea843cbc78bd7d166bdc5ec71c8d3e3ed080a35/python/pygetm/domain.py#L1943
     if args.plot_domain:
-        f = domain.plot(show_mesh=False, show_subdomains=False)
+        f = domain.plot(show_mesh=False, show_subdomains=True, tiling=domain.create_tiling())
         if f is not None:
             f.savefig("domain_mesh.png")
         f = domain.plot(show_mesh=False, show_mask=True)

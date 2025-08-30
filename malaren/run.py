@@ -6,14 +6,12 @@ from pathlib import Path
 import subprocess
 
 start_date = date(1995, 1, 1)
-# stop_date = date(2022, 4, 1)
 stop_date = date(1995, 3, 31)
 
 setup = "malaren"
 script = "run_malaren.py"
-np = 25
+np = 6
 
-start = date(1995, 1, 1)
 start = start_date
 
 while start < stop_date:
@@ -42,6 +40,8 @@ while start < stop_date:
     
     
     command.extend([f"--save_restart", f"restart_{setup}_{y}.nc"])
+    
+    # command.extend(["--plot_domain"]) # In case you want to plot the subdomains and simulated river entry points
 
     p = Path(x)
     if p.is_dir():

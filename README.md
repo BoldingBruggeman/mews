@@ -7,9 +7,19 @@ Below are the steps required - after the initial cloning it is important to keep
   2. Work in your private repository
   3. When ready - create a *pull request - PR*
 
-Be sure to do a *git pull* on a regular basis to keep up with other contributions.
+The best way of working inside a fork and simultaneously updating from the central repo, is by setting up a remote.
 
+On your PC, once:
+1. git clone https://github.com/USERNAME/mews.git
+2. git remote add upstream https://github.com/BoldingBruggeman/mews.git
 
+On your PC, iteratively, in order to get the latest updates from the central repository on your fork:
+1. git fetch upstream
+2. git merge upstream/main
+3. git push
+(this should be done regularly, or at least before making PRs, to keep up with other contributions)
+
+A full description of how to do this, for different OS and different programs to interact with github, can be found here: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo
 
 ## On the proper naming of data describing the depth of lakes
 

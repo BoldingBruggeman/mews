@@ -10,13 +10,13 @@ Below are the steps required - after the initial cloning it is important to keep
 The best way of working inside a fork and simultaneously updating from the central repo, is by setting up a remote.
 
 On your PC, once:
-1) git clone https://github.com/USERNAME/mews.git
-2) git remote add upstream https://github.com/BoldingBruggeman/mews.git
+1. git clone https://github.com/USERNAME/mews.git
+2. git remote add upstream https://github.com/BoldingBruggeman/mews.git
 
 On your PC, iteratively, in order to get the latest updates from the central repository on your fork:
-3) git fetch upstream
-4) git merge upstream/main
-5) git push
+1. git fetch upstream
+2. git merge upstream/main
+3. git push
 (this should be done regularly, or at least before making PRs, to keep up with other contributions)
 
 A full description of how to do this, for different OS and different programs to interact with github, can be found here: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo

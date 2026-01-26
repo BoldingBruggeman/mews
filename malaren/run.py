@@ -25,6 +25,7 @@ while start < stop_date:
     
     days_in_month = calendar.monthrange(start.year, start.month)[1]
     stop = start + timedelta(days=days_in_month)
+    # Alternative, instead of days_in_month: stop = start + timedelta(days=140) # Should be a multiple of output saving interval
     x = start.strftime("%Y-%m-%d %H:%M:%S")
     y = stop.strftime("%Y-%m-%d %H:%M:%S")
     print(f"Simulation from {x} to {y}")

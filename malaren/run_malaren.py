@@ -28,6 +28,22 @@ light_A = 0.58 # non-visible fraction of shortwave radiation (-)
 light_kc1 = 2.5 # attenuation of non-visible fraction of shortwave radiation (m-1)
 light_kc2 = 1.0 # attenuation of visible fraction of shortwave radiation (m-1)
 
+# Outflow regulation (i.e. dynamic outflow based on water level)
+outflow_reg = True
+
+### Output
+# Frequency
+interval_output = 14 # days
+interval_report = 14 # days
+interval_meteo = 140 # days
+interval_highfreq = 24 # hours
+
+# Local high-frequency output sites
+output_local = True
+local_sites = {"gorvaln": [656250, 6588450],
+               "ekoln": [646650, 6626550]}
+# Format: name as first entry, then X and Y coordinates between []
+
 def create_domain(
     runtype: int,
     rivers: bool,
@@ -74,17 +90,22 @@ def create_domain(
                     )
                 )
         # Outflows
-        for river in glob.glob("Rivers/Outflow_file*.nc"):
-            name = os.path.basename(river)
-            name = name.replace("Outflow_file_", "").replace(".nc", "")
-            with netCDF4.Dataset(river) as r:
-                lon = r["lon"][:]
-                lat = r["lat"][:]
-                river_list.append(
-                    domain.rivers.add_by_location(
-                        name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
+        if outflow_reg:
+            river_list.append(domain.rivers.add_by_location("norrstrom", 674250, 6580050, coordinate_type=pygetm.CoordinateType.XY))
+            river_list.append(domain.rivers.add_by_location("hammarby", 674550, 6577950, coordinate_type=pygetm.CoordinateType.XY))
+            river_list.append(domain.rivers.add_by_location("sodertalje", 649650, 6565950, coordinate_type=pygetm.CoordinateType.XY))
+        else:
+            for river in glob.glob("Rivers/Outflow_file*.nc"):
+                name = os.path.basename(river)
+                name = name.replace("Outflow_file_", "").replace(".nc", "")
+                with netCDF4.Dataset(river) as r:
+                    lon = r["lon"][:]
+                    lat = r["lat"][:]
+                    river_list.append(
+                        domain.rivers.add_by_location(
+                            name, float(lon), float(lat), coordinate_type=pygetm.CoordinateType.LONLAT
+                        )
                     )
-                )
         # Tracers
         if use_tracers and os.path.isdir("Tracers"):
             for tracer_file in glob.glob("Tracers/*.nc"):
@@ -171,7 +192,7 @@ def create_simulation(
         delay_slow_ip=True,
     )
     final_kwargs.update(kwargs)
-    sim = pygetm.Simulation(domain, runtype=runtype, fabm = "fabm-selmaprotbas.yaml", **final_kwargs)
+    sim = pygetm.Simulation(domain, runtype=runtype, fabm = "fabm-selmaprotbas.yaml", **final_kwargs) # , gotm = "gotm.yaml"
 
     if sim.runtype < pygetm.RunType.BAROCLINIC:
         sim.sst = sim.airsea.t2m
@@ -208,9 +229,12 @@ def create_simulation(
     ERA_path = "ERA5/precip_????.nc"
     sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
     for river in sim.rivers.values():
-        if "outflow" in river.name:
-            ### Outflow
+        if "outflow" in river.name and not(outflow_reg):
+            ### Prescribed outflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Outflow_file_{river.name}.nc", "q"))
+        elif river.name in ["norrstrom", "hammarby", "sodertalje"] and outflow_reg:
+            ### Regulated outflow
+            river.flow.set(0.0) # To be changed later at runtime
         elif "nctracer_" in river.name:
             ### Tracer
             filename_tracer = river.name.replace("nctracer_", "")
@@ -227,7 +251,7 @@ def create_simulation(
         else:
             ### Inflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "q"))
-            river["pfas_c"].set(0.0)
+            # river["pfas_c"].set(0.0)
             
             # Temperature and oxygen
             river["temp"].follow_target_cell = False
@@ -250,6 +274,11 @@ def create_simulation(
             river["selmaprotbas_dd_n"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n"))
             river["selmaprotbas_dd_p"].follow_target_cell = False
             river["selmaprotbas_dd_p"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_p"))
+            
+            river["selmaprotbas_pw"].follow_target_cell = False
+            river["selmaprotbas_pw"].set(0.0) # Unlikely this is high in the river water, and concentration must be set in order to stabilise the simulation
+            river["selmaprotbas_dd_si"].follow_target_cell = False
+            river["selmaprotbas_dd_si"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "Si")) # Needed to stabilise the simulation. Assume same as Si (For NO3 -> dd_n, it is also in a similar order of magnitude)
     
     # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     
@@ -266,7 +295,7 @@ def create_output(
     path = Path(output_dir, "meteo.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
-        interval=datetime.timedelta(days = 7),
+        interval=datetime.timedelta(days = interval_meteo),
         sync_interval=None,
     )
     output.request(
@@ -281,7 +310,7 @@ def create_output(
     path = Path(output_dir, setup + "_2d.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
-        interval=datetime.timedelta(days=7),
+        interval=datetime.timedelta(days=interval_output),
         sync_interval=None,
     )
     output.request("Ht", "zt", "u1", "v1", "tausxu", "tausyv")
@@ -295,7 +324,7 @@ def create_output(
         path = Path(output_dir, setup + "_3d.nc")
         output = sim.output_manager.add_netcdf_file(
             str(path),
-            interval=datetime.timedelta(days=7),
+            interval=datetime.timedelta(days=interval_output),
             sync_interval=None,
         )
     output.request("Ht", "uk", "vk", "ww", "SS", "num")
@@ -310,8 +339,20 @@ def create_output(
             output.request("nug", "ga", "dga")
 
     if sim.fabm:
-        output.request("pfas_c", "selmaprotbas_po", "total_chlorophyll_calculator_result") # , "age_age_of_water")
-
+        output.request("selmaprotbas_po", "total_chlorophyll_calculator_result") # ,"pfas_c", "age_age_of_water")
+        # output.request("tracerA_c", "tracerB_c", "tracerC_c", "tracerD_c", time_average = True) # Exampmle of extracting time_averaged values
+    
+    # Generate output for high-frequency single locations
+    if output_local:
+        for sitename,loc in local_sites.items():
+            path = Path(output_dir, setup + "_local_" + sitename + ".nc")
+            output = sim.output_manager.add_netcdf_file(
+                str(path),
+                interval=datetime.timedelta(hours = interval_highfreq),
+                sync_interval=None,
+            )
+            transform = pygetm.output.operators.IndexXY.parameterize(x = loc[0], y = loc[1], coordinate_type=pygetm.CoordinateType.XY)
+            output.request("temp", transforms=[transform])
 
 def run(
     sim: pygetm.simulation.Simulation,
@@ -325,14 +366,51 @@ def run(
         print(f"Making a dryrun - skipping sim.advance()")
         print(f"")
     else:
+        if outflow_reg:
+            import math
+            # Based on measurements
+            # Saturating exponential equation above a certain wlvl
+            def outflow_norrstrom(wlvl):
+                background_flow = 21.5 + 5.8 * wlvl
+                high_flow = 300 - 300 * math.exp(-8 * wlvl)
+                return(-1 * max(0.0, background_flow, high_flow))
+            def outflow_hammarby(wlvl):
+                background_flow = -0.94 + 20.5 * wlvl
+                high_flow = 95 - 95 * math.exp(-20 * (wlvl - 0.05))
+                return(-1 * max(0.0, background_flow, high_flow))
+            def outflow_sodertalje(wlvl):
+                background_flow = 16 + 4 * wlvl
+                high_flow = 35 - 35 * math.exp(-50 * (wlvl - 0.2))
+                return(-1 * max(0.0, background_flow, high_flow))
+            
+            local_river_names = [var.name for var in sim.rivers.values()]
+            if "norrstrom" in local_river_names:
+                norrstrom_i = sim.rivers["norrstrom"].i # Was .i_loc in old version, is .i in new version
+                norrstrom_j = sim.rivers["norrstrom"].j # Was .j_loc in old version, is .j in new version
+            if "hammarby" in local_river_names:
+                hammarby_i = sim.rivers["hammarby"].i # Was .i_loc in old version, is .i in new version
+                hammarby_j = sim.rivers["hammarby"].j # Was .j_loc in old version, is .j in new version
+            if "sodertalje" in local_river_names:
+                sodertalje_i = sim.rivers["sodertalje"].i # Was .i_loc in old version, is .i in new version
+                sodertalje_j = sim.rivers["sodertalje"].j # Was .j_loc in old version, is .j in new version
+        
         sim.start(
             simstart,
             timestep=timestep,
             split_factor=20,
             **kwargs,
         )
+        
         while sim.time < simstop:
-            sim.advance()
+            if outflow_reg:
+                if "norrstrom" in local_river_names:
+                    sim.rivers["norrstrom"].flow[...] = (outflow_norrstrom(sim["zt"].all_values[norrstrom_j, norrstrom_i]))
+                if "hammarby" in local_river_names:
+                    sim.rivers["hammarby"].flow[...] = (outflow_hammarby(sim["zt"].all_values[hammarby_j, hammarby_i]))
+                if "sodertalje" in local_river_names:
+                    sim.rivers["sodertalje"].flow[...] = (outflow_sodertalje(sim["zt"].all_values[sodertalje_j, sodertalje_i]))
+            sim.advance() # For debugging mode: check_finite=True
+            # sim.check_finite(True)
         sim.finish()
 
 
@@ -451,7 +529,7 @@ if __name__ == "__main__":
         simstart,
         simstop,
         dryrun=args.dryrun,
-        report=datetime.timedelta(days=7),
-        report_totals=datetime.timedelta(days=7),
+        report=datetime.timedelta(days=interval_report),
+        report_totals=datetime.timedelta(days=interval_report),
         profile=profile,
     )

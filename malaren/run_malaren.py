@@ -33,17 +33,28 @@ outflow_reg = True
 
 ### Output
 # Frequency
-interval_output = 14 # days
-interval_report = 14 # days
+interval_output = 7 # days
+interval_report = 7 # days
 interval_meteo = 140 # days
 interval_highfreq = 24 # hours
 
 # Local high-frequency output sites
 output_local = True
-local_sites = {"gorvaln": [656250, 6588450],
-               "ekoln": [646650, 6626550]}
-# Format: name as first entry, then X and Y coordinates between []
+local_sites = {"prastfjarden": [637650, 6590250],
+               "gorvaln": [652950, 6591150],
+               "fiskarfjarden": [664650, 6578250],
+               "rodstensfjarden": [661050, 6572550],
+               "granfjarden": [601350, 6598950],
+               "galten": [567450, 6590250],
+               "blacken": [587550, 6593850],
+               "vasterasfjarden": [589050, 6604650],
+               "arnofjarden": [626250, 6593250],
+               "ekoln": [646650, 6626550], 
+               "skarven": [658650, 6604950],
+               "ullfjarden": [642750, 6608250],
+               "riddarfjarden": [671850, 6580050]}
 
+# Format: name as first entry, then X and Y coordinates between []                                                                  
 def create_domain(
     runtype: int,
     rivers: bool,
@@ -189,15 +200,19 @@ def create_simulation(
         # airsea=airsea,
         internal_pressure=internal_pressure,
         vertical_coordinates=vertical_coordinates,
-        delay_slow_ip=True,
+        # delay_slow_ip=False,
     )
     final_kwargs.update(kwargs)
-    sim = pygetm.Simulation(domain, runtype=runtype, fabm = "fabm-selmaprotbas.yaml", **final_kwargs) # , gotm = "gotm.yaml"
-
+    sim = pygetm.Simulation(domain, runtype=runtype, gotm = "gotm.yaml", fabm = "fabm-selmaprotbas.yaml", **final_kwargs)
+    
+    # for name, field in sorted(sim.output_manager.fields.items()):
+        # print(f"{name} - {getattr(field, 'long_name', '')}")
+    # raise(Exception("!!!"))
+    
     if sim.runtype < pygetm.RunType.BAROCLINIC:
         sim.sst = sim.airsea.t2m
     if sim.runtype == pygetm.RunType.BAROCLINIC:
-        sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_III) # sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
         # Overwrite Jerlov type by user settings
         sim.radiation.A.fill(light_A)
         sim.radiation.kc1.fill(light_kc1)
@@ -251,7 +266,6 @@ def create_simulation(
         else:
             ### Inflow
             river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "q"))
-            # river["pfas_c"].set(0.0)
             
             # Temperature and oxygen
             river["temp"].follow_target_cell = False
@@ -274,13 +288,17 @@ def create_simulation(
             river["selmaprotbas_dd_n"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_n"))
             river["selmaprotbas_dd_p"].follow_target_cell = False
             river["selmaprotbas_dd_p"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "dd_p"))
+            river["dom_dom_a"].follow_target_cell = False
+            river["dom_dom_a"].set(0.0)
+            river["dom_dom_b"].follow_target_cell = False
+            river["dom_dom_b"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "DOM"))
             
             river["selmaprotbas_pw"].follow_target_cell = False
             river["selmaprotbas_pw"].set(0.0) # Unlikely this is high in the river water, and concentration must be set in order to stabilise the simulation
             river["selmaprotbas_dd_si"].follow_target_cell = False
             river["selmaprotbas_dd_si"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "Si")) # Needed to stabilise the simulation. Assume same as Si (For NO3 -> dd_n, it is also in a similar order of magnitude)
     
-    # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
+    sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     
     return sim
 
@@ -327,21 +345,20 @@ def create_output(
             interval=datetime.timedelta(days=interval_output),
             sync_interval=None,
         )
-    output.request("Ht", "uk", "vk", "ww", "SS", "num")
+    output.request("Ht", "uk", "vk", time_average = True) # , "ww", "SS", "num"
     if args.debug_output:
         output.request("fpk", "fqk", "advpk", "advqk")  # 'diffpk', 'diffqk')
 
     if sim.runtype == pygetm.RunType.BAROCLINIC:
-        output.request("temp", "salt", "rho", "NN", "rad", "sst", "hnt", "nuh")
+        output.request("temp", "sst", "hnt", "nuh", "rad") # "salt", "rho", "NN", "rad", , "nuh", "taub" # "rad" should add "zft"
         if args.debug_output:
             output.request("idpdx", "idpdy")
         if use_adaptive:
             output.request("nug", "ga", "dga")
 
     if sim.fabm:
-        output.request("selmaprotbas_po", "total_chlorophyll_calculator_result") # ,"pfas_c", "age_age_of_water")
-        # output.request("tracerA_c", "tracerB_c", "tracerC_c", "tracerD_c", time_average = True) # Exampmle of extracting time_averaged values
-    
+        output.request("selmaprotbas_po", "selmaprotbas_nn", "selmaprotbas_aa", "selmaprotbas_o2", "phytoplankton_chla", "dom_dom_a", "dom_dom_b", "age_age_of_water")
+
     # Generate output for high-frequency single locations
     if output_local:
         for sitename,loc in local_sites.items():
@@ -352,7 +369,7 @@ def create_output(
                 sync_interval=None,
             )
             transform = pygetm.output.operators.IndexXY.parameterize(x = loc[0], y = loc[1], coordinate_type=pygetm.CoordinateType.XY)
-            output.request("temp", transforms=[transform])
+            output.request("temp", "selmaprotbas_po", "selmaprotbas_nn", "selmaprotbas_aa", "selmaprotbas_o2", "phytoplankton_chla", "dom_dom_a", "dom_dom_b", transforms=[transform])
 
 def run(
     sim: pygetm.simulation.Simulation,
@@ -385,14 +402,14 @@ def run(
             
             local_river_names = [var.name for var in sim.rivers.values()]
             if "norrstrom" in local_river_names:
-                norrstrom_i = sim.rivers["norrstrom"].i # Was .i_loc in old version, is .i in new version
-                norrstrom_j = sim.rivers["norrstrom"].j # Was .j_loc in old version, is .j in new version
+                norrstrom_i = sim.rivers["norrstrom"].i
+                norrstrom_j = sim.rivers["norrstrom"].j
             if "hammarby" in local_river_names:
-                hammarby_i = sim.rivers["hammarby"].i # Was .i_loc in old version, is .i in new version
-                hammarby_j = sim.rivers["hammarby"].j # Was .j_loc in old version, is .j in new version
+                hammarby_i = sim.rivers["hammarby"].i
+                hammarby_j = sim.rivers["hammarby"].j
             if "sodertalje" in local_river_names:
-                sodertalje_i = sim.rivers["sodertalje"].i # Was .i_loc in old version, is .i in new version
-                sodertalje_j = sim.rivers["sodertalje"].j # Was .j_loc in old version, is .j in new version
+                sodertalje_i = sim.rivers["sodertalje"].i
+                sodertalje_j = sim.rivers["sodertalje"].j
         
         sim.start(
             simstart,
@@ -440,7 +457,7 @@ if __name__ == "__main__":
         "--bathymetry_name",
         type=str,
         help="Name of bathymetry variable",
-        default="bathymetry",
+        default="bathymetry", # initial smoothing: laplacian_rx0
     )
 
     parser.add_argument(
@@ -519,7 +536,7 @@ if __name__ == "__main__":
         sim.output_manager.add_restart(args.save_restart)
 
     if args.load_restart and not args.dryrun:
-        simstart = sim.load_restart(args.load_restart) # Old: , decode_timedelta=False) # decode_timedelta=False is to avoid problems with age_of_water
+        simstart = sim.load_restart(args.load_restart, decode_timedelta=False) # Old: , decode_timedelta=False) # decode_timedelta=False is to avoid problems with age_of_water
 
     simstart = datetime.datetime.strptime(args.start, "%Y-%m-%d %H:%M:%S")
     simstop = datetime.datetime.strptime(args.stop, "%Y-%m-%d %H:%M:%S")

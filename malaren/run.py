@@ -5,15 +5,15 @@ import calendar
 from pathlib import Path
 import subprocess
 
-start_date = date(1995, 1, 1)
-stop_date = date(2025, 12, 31)
+start_date = date(2021, 1, 1)
+stop_date = date(2023, 12, 31)
 
 setup = "malaren"
 script = "run_malaren.py"
 np = 30
 
 start = start_date
-start = date(1999, 12, 26)
+
 while start < stop_date:
     command = [
         "mpiexec",

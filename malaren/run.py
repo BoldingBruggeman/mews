@@ -5,12 +5,12 @@ import calendar
 from pathlib import Path
 import subprocess
 
-start_date = date(1995, 1, 1)
-stop_date = date(1995, 3, 31)
+start_date = date(2021, 1, 1)
+stop_date = date(2023, 12, 31)
 
 setup = "malaren"
 script = "run_malaren.py"
-np = 6
+np = 30
 
 start = start_date
 
@@ -23,8 +23,8 @@ while start < stop_date:
         script,
     ]
     
-    days_in_month = calendar.monthrange(start.year, start.month)[1]
-    stop = start + timedelta(days=days_in_month)
+    # days_in_month = calendar.monthrange(start.year, start.month)[1]
+    stop = start + timedelta(days=140) # Multiple of output saving interval - 7 days # Was: days=days_in_month
     x = start.strftime("%Y-%m-%d %H:%M:%S")
     y = stop.strftime("%Y-%m-%d %H:%M:%S")
     print(f"Simulation from {x} to {y}")

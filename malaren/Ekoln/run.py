@@ -5,15 +5,13 @@ import calendar
 from pathlib import Path
 import subprocess
 
-start_date = date(1995, 1, 1)
-# stop_date = date(2022, 4, 1)
-stop_date = date(1995, 3, 31)
+start_date = date(2021, 1, 1)
+stop_date = date(2023, 3, 31)
 
 setup = "ekoln"
 script = "run_ekoln.py"
 np = 6
 
-start = date(1995, 1, 1)
 start = start_date
 
 while start < stop_date:

@@ -1,0 +1,62 @@
+title: ParSAC sensitivity run     # Run title used in output [not yet]
+sobol:
+  N: 256   # base sample size
+parameters:
+  - name: "instances/Green/parameters/rfr"
+    min: 0.001
+    max: 0.02
+    logscale: false
+  - name: "instances/Green/parameters/rfn"
+    min: 0.05
+    max: 0.3
+    logscale: false
+  - name: "instances/Green/parameters/alpha_n"
+    min: 0.05
+    max: 0.8
+    logscale: false
+  - name: "instances/Green/parameters/alpha_p"
+    min: 0.005
+    max: 0.1
+    logscale: false
+  - name: "instances/Green/parameters/alpha_light"
+    min: 0.05
+    max: 0.3
+    logscale: false
+  - name: "instances/Green/parameters/r0"
+    min: 1
+    max: 5
+    logscale: false
+  - name: "instances/Green/parameters/nb"
+    min: 0.005
+    max: 0.1
+    logscale: false
+  - name: "instances/Green/parameters/deltao"
+    min: 0.005
+    max: 0.06
+    logscale: false
+  - name: "instances/Green/parameters/wz"
+    min: 0
+    max: 0.09
+    logscale: false
+  - name: "instances/Green/parameters/sedrate"
+    min: 0
+    max: 0.3
+    logscale: false
+  - name: "instances/Green/parameters/imin"
+    min: 0
+    max: 10
+    logscale: false
+  - name: "instances/Green/parameters/temp_opt"
+    min: 18
+    max: 26
+    logscale: false
+  - name: "instances/Green/parameters/temp_sigma"
+    min: 3
+    max: 10
+    logscale: false
+  - name: "instances/Green/parameters/tau_crit"
+    min: 3
+    max: 10
+    logscale: false
+targets:
+  - "output.nc:Green_c[-700:,-8:].mean()"

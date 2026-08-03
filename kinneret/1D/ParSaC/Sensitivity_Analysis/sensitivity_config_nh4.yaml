@@ -1,0 +1,65 @@
+title: ParSAC sensitivity run     # Run title used in output [not yet]
+sobol:
+  N: 256   # base sample size
+parameters:
+  - name: "instances/selmaprotbas/parameters/dn"
+    min: 0.0001
+    max: 0.01
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/dn_sed"
+    min: 0.0001
+    max: 0.01
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/q10_rec"
+    min: 0.05
+    max: 0.18
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/q10_recs"
+    min: 0.05
+    max: 0.18
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/sedrate"
+    min: 0.1
+    max: 8.0
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/br0"
+    min: 0.005
+    max: 0.3
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/fds"
+    min: 0.5
+    max: 0.99
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/pvel"
+    min: 1.0
+    max: 15.0
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/wdz"
+    min: -6
+    max: -0.1
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/mbnnrate"
+    min: 0.05
+    max: 3
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/mbsrate"
+    min: 0.001
+    max: 0.5
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/nitrif_rate"
+    min: 0.001
+    max: 0.2
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/tau_crit"
+    min: 0.01
+    max: 0.2
+    logscale: false
+targets:
+  - "output.nc:selmaprotbas_DO_mg[:,0:5].min()"
+  - "output.nc:selmaprotbas_DO_mg[:,0:5].max()"
+  - "output.nc:selmaprotbas_DO_mg[:,-5:].min()"
+  - "output.nc:selmaprotbas_DO_mg[:,-5:].max()"
+  - "output.nc:selmaprotbas_aa[:,0:5].min()"
+  - "output.nc:selmaprotbas_aa[:,0:5].max()"
+  - "output.nc:selmaprotbas_aa[:,-5:].min()"
+  - "output.nc:selmaprotbas_aa[:,-5:].max()"

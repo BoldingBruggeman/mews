@@ -1,0 +1,67 @@
+#Step-by-Step GOTM Installation Protocol
+#Step 1: Clone GOTM Repository
+
+git clone --recursive https://github.com/gotm-model/code.git gotm
+cd gotm
+git checkout origin/lake
+git submodule update --init --recursive
+cd ..
+
+#Step 2: Clone selmaprotbas Repository
+
+git clone https://github.com/jorritmesman/selmaprotbas.git ~/gotm/extern/fabm/src/models/selmaprotbas
+
+#Step 3: Update CMakeLists.txt for selmaprotbas
+
+    Edit ~/gotm/extern/fabm/src/models/selmaprotbas/CMakeLists.txt: Replace the contents with:
+    
+    nano ~/gotm/extern/fabm/src/models/selmaprotbas/CMakeLists.txt
+
+
+add_subdirectory(selmaprotbas)
+
+set_property(TARGET fabm_models_selmaprotbas PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+Edit ~/gotm/extern/fabm/src/models/selmaprotbas/selmaprotbas/CMakeLists.txt: Replace the contents with:
+
+nano ~/gotm/extern/fabm/src/models/selmaprotbas/selmaprotbas/CMakeLists.txt
+
+
+
+add_library(fabm_models_selmaprotbas OBJECT
+    selmaprotbas_model_library.F90
+    selmaprotbas.F90
+    phytoplankton.F90
+    zooplankton.F90
+)
+
+# Ensure fabm_base is built first
+add_dependencies(fabm_models_selmaprotbas fabm_base)
+
+
+#Step 4: Build GOTM
+
+mkdir -p build
+cd build
+cmake ../gotm \
+    -DGOTM_USE_FABM=ON \
+    -DFABM_INSTITUTES=selmaprotbas \
+    -DFABM_SELMAPROTBAS_BASE=/home/shikhani/gotm/extern/fabm/src/models/selmaprotbas \
+    -DGOTM_USE_STIM=ON
+
+make
+
+#Step 5: Copy GOTM Executable to Simulation Folder
+
+cp ~/build/gotm ~/projects/Mews_Data_Ohra/GOTM/MälarenD_sandbox/
+
+
+
+#Step 6: Run GOTM
+
+Navigate to the simulation folder and run GOTM with your configuration file:
+
+cd ~/projects/Mews_Data_Ohra/GOTM/MälarenD_sandbox
+./gotm gotm_test.yaml

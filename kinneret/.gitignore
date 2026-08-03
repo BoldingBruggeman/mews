@@ -1,2 +1,33 @@
-meteo.nc
-kinneret_?d.nc
+# folders and subfolders
+DoNotSync/
+1D/Older executables/
+1D/dupicated year 2010/
+1D/Mass_Balance/
+1D/dat files to delete/
+1D/For hydroshare/
+1D/ParSaC/Calibration Ioannins/
+1D/ParSaC/calibration_results_gotm/
+1D/ParSaC/Old calibration codes/
+
+# R
+.Rhistory
+.RData
+Rplots.pdf
+
+# model outputs and inputs
+*.nc
+!Bathymetry/bathymetry_400m_smoothed.nc
+*.dat
+*.obs
+
+# databases
+*.db
+
+# archives
+*.zip
+
+# figures
+*.png
+
+# backups
+*.b4

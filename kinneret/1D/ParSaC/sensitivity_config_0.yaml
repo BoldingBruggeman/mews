@@ -1,0 +1,346 @@
+title: ParSAC sensitivity run     # Run title used in output [not yet]
+sobol:
+  N: 256   # base sample size
+parameters:
+  - name: "instances/selmaprotbas/parameters/dn_sed"
+    min: 0.0001
+    max: 0.01
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/q10_recs"
+    min: 0.05
+    max: 0.16
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/sedrate"
+    min: 0.1
+    max: 8.0
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/br0"
+    min: 0.005
+    max: 0.3
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/fds"
+    min: 0.5
+    max: 0.99
+    logscale: false
+  - name: instances/selmaprotbas/parameters/wdz
+    min: -5.0
+    max: 0.1
+    logscale: false
+  - name: instances/selmaprotbas/parameters/wpo4
+    min: -2.0
+    max: 0.1
+    logscale: false
+  - name: instances/selmaprotbas/parameters/mbnnrate
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/mbsrate
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/den_frac_denanmx
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/den_frac_denanmx_sed
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/tau_crit
+    min: 0.01
+    max: 0.2
+    logscale: false
+  - name: instances/selmaprotbas/parameters/erorate
+    min: 0.01
+    max: 10.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/sedratepo4
+    min: 0.1
+    max: 2.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/eroratepo4
+    min: 0.01
+    max: 10.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/po4ret
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/pburialrate
+    min: 0.001
+    max: 0.5
+    logscale: false
+  - name: instances/selmaprotbas/parameters/fl_burialrate
+    min: 0.00001
+    max: 0.01
+    logscale: true
+  - name: instances/selmaprotbas/parameters/pliberationrate
+    min: 0.001
+    max: 0.2
+    logscale: false
+  - name: instances/selmaprotbas/parameters/ipo4th
+    min: 5.0
+    max: 200.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/pvel
+    min: 1.0
+    max: 12.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/kc
+    min: 0.0001
+    max: 0.0008
+    logscale: false
+  - name: instances/selmaprotbas/parameters/nitrif_rate
+    min: 0.001
+    max: 0.1
+    logscale: false
+  - name: instances/CyanoMC/parameters/rfr
+    min: 0.005
+    max: 0.015
+    logscale: false
+  - name: instances/CyanoMC/parameters/rfn
+    min: 0.1
+    max: 0.2
+    logscale: false
+  - name: instances/CyanoMC/parameters/alpha_n
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/CyanoMC/parameters/alpha_p
+    min: 0.0001
+    max: 0.005
+    logscale: false
+  - name: instances/CyanoMC/parameters/r0
+    min: 0.5
+    max: 5.0
+    logscale: false
+  - name: instances/CyanoMC/parameters/deltao
+    min: 0.001
+    max: 0.1
+    logscale: false
+  - name: instances/CyanoMC/parameters/nb
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/CyanoMC/parameters/wz
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/CyanoMC/parameters/kc
+    min: 0.0008
+    max: 0.0032
+    logscale: false
+  - name: instances/CyanoMC/parameters/sedrate
+    min: 0.0
+    max: 0.05
+    logscale: false
+  - name: instances/CyanoMC/parameters/tau_crit
+    min: 0.01
+    max: 0.1
+    logscale: false
+  - name: instances/CyanoMC/parameters/temp_opt
+    min: 14
+    max: 20
+    logscale: false
+  - name: instances/CyanoMC/parameters/temp_min
+    min: 8
+    max: 14
+    logscale: false
+  - name: instances/CyanoMC/parameters/alpha_light
+    min: 0.01
+    max: 0.5
+    logscale: false
+  - name: instances/CyanoMC/parameters/imin
+    min: 0
+    max: 25
+    logscale: false
+
+  - name: instances/NfixCyano/parameters/rfr
+    min: 0.005
+    max: 0.015
+    logscale: false
+  - name: instances/NfixCyano/parameters/rfn
+    min: 0.1
+    max: 0.2
+    logscale: false
+  - name: instances/NfixCyano/parameters/alpha_p
+    min: 0.0001
+    max: 0.005
+    logscale: false
+  - name: instances/NfixCyano/parameters/r0
+    min: 0.5
+    max: 5.0
+    logscale: false
+  - name: instances/NfixCyano/parameters/deltao
+    min: 0.001
+    max: 0.1
+    logscale: false
+  - name: instances/NfixCyano/parameters/nb
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/NfixCyano/parameters/wz
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/NfixCyano/parameters/kc
+    min: 0.0008
+    max: 0.0032
+    logscale: false
+  - name: instances/NfixCyano/parameters/sedrate
+    min: 0.0
+    max: 0.05
+    logscale: false
+  - name: instances/NfixCyano/parameters/tau_crit
+    min: 0.01
+    max: 0.1
+    logscale: false
+  - name: instances/NfixCyano/parameters/temp_opt
+    min: 20
+    max: 30
+    logscale: false
+  - name: instances/NfixCyano/parameters/temp_min
+    min: 15
+    max: 25
+    logscale: false
+  - name: instances/NfixCyano/parameters/alpha_light
+    min: 0.01
+    max: 0.5
+    logscale: false
+  - name: instances/NfixCyano/parameters/imin
+    min: 0
+    max: 25
+    logscale: false
+
+  - name: instances/Green/parameters/rfr
+    min: 0.005
+    max: 0.015
+    logscale: false
+  - name: instances/Green/parameters/rfn
+    min: 0.1
+    max: 0.2
+    logscale: false
+  - name: instances/Green/parameters/alpha_n
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/Green/parameters/alpha_p
+    min: 0.0001
+    max: 0.005
+    logscale: false
+  - name: instances/Green/parameters/r0
+    min: 0.5
+    max: 5.0
+    logscale: false
+  - name: instances/Green/parameters/deltao
+    min: 0.001
+    max: 0.1
+    logscale: false
+  - name: instances/Green/parameters/nb
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/Green/parameters/wz
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/Green/parameters/kc
+    min: 0.0008
+    max: 0.0032
+    logscale: false
+  - name: instances/Green/parameters/sedrate
+    min: 0.0
+    max: 0.05
+    logscale: false
+  - name: instances/Green/parameters/tau_crit
+    min: 0.01
+    max: 0.1
+    logscale: false
+  - name: instances/Green/parameters/tll
+    min: 8
+    max: 24
+    logscale: false
+  - name: instances/Green/parameters/alpha_light
+    min: 0.01
+    max: 0.5
+    logscale: false
+  - name: instances/Green/parameters/imin
+    min: 0
+    max: 25
+    logscale: false
+
+  - name: instances/Dino/parameters/rfr
+    min: 0.005
+    max: 0.015
+    logscale: false
+  - name: instances/Dino/parameters/rfn
+    min: 0.1
+    max: 0.2
+    logscale: false
+  - name: instances/Dino/parameters/alpha_n
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/Dino/parameters/alpha_p
+    min: 0.0001
+    max: 0.005
+    logscale: false
+  - name: instances/Dino/parameters/r0
+    min: 0.5
+    max: 5.0
+    logscale: false
+  - name: instances/Dino/parameters/deltao
+    min: 0.001
+    max: 0.1
+    logscale: false
+  - name: instances/Dino/parameters/nb
+    min: 0.001
+    max: 0.05
+    logscale: false
+  - name: instances/Dino/parameters/wz
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/Dino/parameters/kc
+    min: 0.0008
+    max: 0.0032
+    logscale: false
+  - name: instances/Dino/parameters/sedrate
+    min: 0.0
+    max: 0.05
+    logscale: false
+  - name: instances/Dino/parameters/tau_crit
+    min: 0.01
+    max: 0.1
+    logscale: false
+  - name: instances/Dino/parameters/temp_opt
+    min: 16
+    max: 25
+    logscale: false
+  - name: instances/Dino/parameters/temp_min
+    min: 8
+    max: 16
+    logscale: false
+  - name: instances/Dino/parameters/alpha_light
+    min: 0.01
+    max: 0.5
+    logscale: false
+  - name: instances/Dino/parameters/imin
+    min: 0
+    max: 25
+    logscale: false
+
+targets:
+  - "output.nc:selmaprotbas_po[731:,0:5].mean()" # mean of bottom 5 layers, from 3rd year
+  - "output.nc:selmaprotbas_po[731:,-5:].mean()" # mean of top 5 layers, from 3rd year
+  - "output.nc:selmaprotbas_DO_mg[731:,0:5].mean()"
+  - "output.nc:selmaprotbas_DO_mg[731:,-5:].mean()"
+  - "output.nc:selmaprotbas_aa[731:,0:5].mean()"
+  - "output.nc:selmaprotbas_aa[731:,-5:].mean()"
+  - "output.nc:selmaprotbas_nn[731:,0:5].mean()"
+  - "output.nc:selmaprotbas_nn[731:,-5:].mean()"
+  - "output.nc:CyanoMC_c[731:,-5:].mean()"
+  - "output.nc:NfixCyano_c[731:,-5:].mean()"
+  - "output.nc:Green_c[731:,-5:].mean()"
+  - "output.nc:Dino_c[731:,-5:].mean()"
+

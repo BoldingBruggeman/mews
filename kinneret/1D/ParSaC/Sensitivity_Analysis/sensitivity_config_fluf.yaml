@@ -1,0 +1,90 @@
+title: ParSAC sensitivity run     # Run title used in output [not yet]
+sobol:
+  N: 256   # base sample size
+parameters:
+  - name: "instances/selmaprotbas/parameters/dn_sed"
+    min: 0.0001
+    max: 0.01
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/q10_recs"
+    min: 0.05
+    max: 0.16
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/sedrate"
+    min: 0.1
+    max: 8.0
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/br0"
+    min: 0.005
+    max: 0.3
+    logscale: false
+  - name: "instances/selmaprotbas/parameters/fds"
+    min: 0.5
+    max: 0.99
+    logscale: false
+  - name: instances/selmaprotbas/parameters/wdz
+    min: -10.0
+    max: -1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/wpo4
+    min: -2.0
+    max: -0.1
+    logscale: false
+  - name: instances/selmaprotbas/parameters/mbnnrate
+    min: 0.0
+    max: 5.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/mbsrate
+    min: 0.0
+    max: 2.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/den_frac_denanmx
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/den_frac_denanmx_sed
+    min: 0.0
+    max: 1.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/tau_crit
+    min: 0.05
+    max: 0.2
+    logscale: false
+  - name: instances/selmaprotbas/parameters/erorate
+    min: 0.01
+    max: 10.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/sedratepo4
+    min: 0.1
+    max: 2.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/eroratepo4
+    min: 0.01
+    max: 10.0
+    logscale: false
+  - name: instances/selmaprotbas/parameters/po4ret
+    min: 0.0
+    max: 0.5
+    logscale: false
+  - name: instances/selmaprotbas/parameters/pburialrate
+    min: 0.001
+    max: 0.1
+    logscale: false
+  - name: instances/selmaprotbas/parameters/fl_burialrate
+    min: 0.00001
+    max: 0.01
+    logscale: false
+  - name: instances/selmaprotbas/parameters/pliberationrate
+    min: 0.01
+    max: 0.2
+    logscale: false
+  - name: instances/selmaprotbas/parameters/ipo4th
+    min: 10.0
+    max: 200.0
+    logscale: false
+
+targets:
+  - "output.nc:selmaprotbas_fl_c[366:,0:5].mean()" # mean of bottom 5 layers, from 2nd year
+  - "output.nc:selmaprotbas_fl_p[366:,0:5].mean()"
+  - "output.nc:selmaprotbas_fl_n[366:,0:5].mean()"
+

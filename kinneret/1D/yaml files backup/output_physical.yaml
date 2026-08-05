@@ -1,0 +1,14 @@
+output:
+   time_unit: hour
+   time_step: 1
+   sync_interval: 0
+   variables:
+      - source: h
+      - source: temp
+      - source: sst
+      - source: evap
+      - source: Af
+      - source: airt
+      - source: u10
+      - source: hum
+      - source: I_0

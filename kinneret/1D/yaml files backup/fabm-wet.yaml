@@ -1,0 +1,829 @@
+instances:                                                      #
+  abiotic_water:                                                #
+    long_name: abiotic_process_in_water                         # long name
+    model: wet/abiotic_water                                    # model
+    parameters:                                                 # parameters
+      cCPerDWW: 0.3942                                          # C content of organic matter (gC/gDW), default = 0.4
+      cExtSpPOM: 0.20146                                        # specific extinction factor for POM (m2/gDW), default = 0.15
+      cExtSpIM: 0.16157                                         # specific extinction inorganic matter (m2/gDW), default = 0.05
+      cKPAdsOxW: 0.5882                                         # P adsorption affinity at oxidized conditions (m3/gP), default = 0.6
+      cRelPAdsAlW: 0.14                                         # maximum P adsorption per g Al (gP/gAl), default = 0.134
+      cRelPAdsDWW: 4.0e-05                                      # maximum P adsorption per g DW (gP/gDW), default = 3e-05
+      cRelPAdsFeW: 0.065                                        # maximum P adsorption per g Fe (gP/gFe), default = 0.0675
+      cThetaAer: 1.033                                          # temperature coefficient for reaeration (1/e^*C), default = 1.011
+      cThetaNitrW: 1.0929                                       # temperature coefficient for nitrification (1/e^*C), default = 1.03
+      cVSetPOM: -0.4843                                         # maximum settling rate of POM (m/d), default = -0.3
+      cVSetIM: -0.9083                                          # maximum settling rate of inorganic matter (m/d), default = -1.1
+      fAlDIMW: 0.015                                            # Al content of inorganic matter (gAl/gDW), default = 0.01
+      fFeDIMW: 0.01003                                          # Fe content of inorganic matter (gFe/gDW), default = 0.01
+      fRedMaxW: 0.8595                                          # maximum reduction factor of P adsorption affinity (-), default = 0.9
+      hNO3DenitW: 0.04152                                       # quadratic half saturation NO3 conc. for denitrification (mgN/l), default = 1.0
+      hO2BOD: 0.5763                                            # half saturation oxygen conc. for BOD (mgO2/l), default = 1.0
+      hO2Nitr: 18.62                                            # half saturation oxygen conc. for nitrification (mgO2/l), default = 2.0
+      kNitrW: 0.29405                                           # nitrification rate constant in water at 20*C (1/d), default = 0.3
+      kPSorpW: 0.05944                                          # P adsorption rate constant (1/d), default = 0.05
+      NO3PerCW: 8.049                                           # denitrified NO3 per C mineralised (mol/mol), default = 1.0
+      O2PerNH4W: 0.13599                                        # used O2 per NH4 nitrified (mol/mol), default = 2.0
+      cThetaMinPOMW: 1.026                                      # temperature coefficient of mineralization from POM to DOM (1/e^*C), default = 1.02
+      kDMinPOMW: 0.000608                                       # decomposition constant of POM-DW at 20*C (1/d), default = 0.001
+      kNMinPOMW: 0.0058                                         # decomposition constant of POM-N at 20*C (1/d), default = 0.01
+      kPMinPOMW: 0.0075                                         # decomposition constant of POM-P at 20*C (1/d), default = 0.01
+      kSiMinPaW: 0.0002921                                      # biodissolution constant of particulate Si to SiO2 at 20*C (1/d), default = 0.03
+      cThetaMinDOMW: 1.0262                                     # temperature coefficient of DOM mineralization (1/e^*C), default = 1.07
+      kDMinDOMW: 0.03415                                        # mineralization constant of DOM-DW at 20*C (1/d), default = 0.03 
+      kNMinDOMW: 0.01                                           # mineralization constant of DOM-N at 20*C (1/d), default = 0.01 
+      kPMinDOMW: 0.01                                           # mineralization constant of DOM-P at 20*C (1/d), default = 0.01
+      tDDepoIM: 0.25                                            # inorganic matter deposition (g/m2/d), default = 0.25
+      tDDepoPOM: 0.02                                           # organic matter deposition, dry weight (g/m2/d), default = 0.005
+      tNDepoPOM: 7.07e-05                                       # organic matter deposition, nitrogen (g/m2/d), default = 7.07e-05
+      tPDepoPOM: 0.000888                                       # organic matter deposition, phosphorus (g/m2/d), default = 0.000888 
+      tPDepoPO4: 0.00025                                        # phosphate deposition (g/m2/d), default = 0.000247 (AZ)
+      tNDepoNH4: 0.00018                                        # ammonium deposition (g/m2/d), default = 0.00018
+      tNDepoNO3: 0.00046                                        # nitrate deposition (g/m2/d), default = 0.00046
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sNH4W: 0.047                                              # ammonium (g/m3)
+      sNO3W: 0.057                                              # nitrate (g/m3)
+      sPO4W: 0.002                                              # phosphate (g/m3)
+      sPAIMW: 8e-07                                             # IM-adsorbed P (g/m3)
+      sSiO2W: 0.2                                               # silica dioxide (g/m3)
+      sO2W: 8.9                                                 # oxygen (g/m3)
+      sDIMW: 0.00305                                            # inorganic matter (g/m3)
+      sDPOMW: 0.25                                              # particulate org. matter DW (g/m3)
+      sPPOMW: 0.0014                                            # particulate organic P (g/m3)
+      sNPOMW: 0.028                                             # particulate organic N (g/m3)
+      sSiPaW: 0.1                                               # particulate Si (g/m3)
+      sDDOMW: 0.57                                              # dissolved org. matter DW (g/m3)
+      sPDOMW: 0.01507                                           # dissolved organic P (g/m3)
+      sNDOMW: 0.2755                                            # dissolved organic N (g/m3)
+  abiotic_sediment:                                             #
+    long_name: abiotic_process_in_sediment                      # long name
+    model: wet/abiotic_sediment                                 # model
+    parameters:                                                 # parameters
+      cDepthS: 1.0516                                           # sediment depth (m), default = 0.1
+      fRefrPOMS: 0.09744                                        # refractory fraction of sediment POM (-), default = 0.1
+      cCPerDWS: 0.4199                                          # C content of organic DW matter (gC/gDW), default = 0.4
+      O2PerNH4S: 1.1182                                         # O2 used per NH4 nitrified (mol/mol), default = 2.0
+      kNitrS: 0.3357                                            # nitrification rate constant at 20*C (1/d), default = 1.2
+      cThetaNitrS: 2.0978                                       # temperature coefficient for nitrification (1/e^*C), default = 1.03
+      NO3PerCS: 22.717                                          # NO3 denitrified per C mineralized (mol/mol), default = 1.0
+      hNO3DenitS: 0.5261                                        # quadratic half-sat. NO3 conc. for denitrification (mgN/l), default = 0.5
+      kPSorpS: 0.0321                                           # P sorption rate constant (1/d), default = 0.03
+      cRelPAdsDWS: 0.0001943                                    # max. P adsorption per g DW (gP/gDW), default = 3e-05
+      cRelPAdsFeS: 0.06285                                      # max. P adsorption per g Fe (gP/gFe), default = 0.06
+      fFeDIM: 0.04045                                           # Fe content of inorganic matter (gFe/gD), default = 0.04
+      cRelPAdsAlS: 0.12939                                      # max. P adsorption per g Al (gP/gAl), default = 0.134
+      fAlDIMS: 0.018693                                         # Al content of inorganic matter (gAl/gD), default = 0.01
+      fRedMaxS: 0.9745                                          # max. reduction factor of P adsorption affinity (-), default = 0.96
+      cKPAdsOxS: 1.3654                                         # P adsorption affinity at oxidized conditions (m3/gP), default = 1.5
+      kPChemPO4: 2.0215                                         # chemical PO4 loss rate (1/d), default = 0.03 or ~4.8
+      coPO4Max: 1.4546                                          # max. soluble reactive P conc. in pore water (mgP/l), default = 1.4 or 0.1
+      bPorS: 0.85                                               # sediment porosity (m3/m3), default = 0.85
+      cThetaDif: 1.0155                                         # temperature coefficient for diffusion (1/e^*C), default = 1.016
+      fDepthDifS: 0.5111                                        # nutrient diffusion distance as fraction of sediment depth (-), default = 0.5
+      kNDifNH4: 4.403e-05                                       # molecular NH4 diffusion constant at 20*C (m2/d), default = 0.000112
+      cTurbDifNut: 7.659                                        # bioturbation correction of nutrient diffusion (-), default = 12.0
+      bPorCorS: 0.8166                                          # sediment porosity, corrected for tortuosity (m3/m3), default = 0.737275
+      kNDifNO3: 0.000116                                        # NO3 diffusion constant at 20*C (m2/d), default = 8.6e-05
+      kPDifPO4: 9.447e-05                                       # PO4 diffusion constant at 20*C (m2/d), default = 6.2e-05
+      kO2Dif: 0.004432                                          # O2 diffusion constant at 20*C (m2/d), default = 0.00017
+      cTurbDifO2: 3.819                                         # bioturbation factor for oxygen diffusion (-), default = 5.0
+      kDMinHum: 4.178e-05                                       # humic decomposition constant at 20*C (1/d), default = 5.7e-05
+      cThetaMinPOMS: 1.0519                                     # temperature coefficient of POM mineralization (1/e^*C), default = 1.074
+      kDMinPOMS: 0.009786                                       # decomposition constant of POM-DW at 20*C (1/d), default = 0.003
+      kNMinPOMS: 0.007558                                       # decomposition constant of POM-N at 20*C (1/d), default = 0.002
+      kPMinPOMS: 0.0010196                                      # decomposition constant of POM-P at 20*C (1/d), default = 0.001
+      kSiMinPaS: 0                                              # SiPOM to SiO2 biodissolution constant at 20*C (1/d), default = 0.03 0.0138
+      cThetaMinDOMS: 1.0764                                     # temperature coefficient of DOM mineralization (1/e^*C), default = 1.06
+      kDMinDOMS: 0.04061                                        # mineralization constant of DOM-DW at 20*C (1/d), default = 0.001
+      kNMinDOMS: 0.012937                                       # mineralization constant of DOM-N at 20*C (1/d), default = 0.003
+      kPMinDOMS: 0.016753                                       # mineralization constant of DOM-P at 20*C (1/d), default = 0.003
+      kDDifDOM: 0.003077                                        # DOM diffusion constant DW at 20*C (m2/d), default = 0.002
+      kNDifDOM: 0.0013659                                       # DOM diffusion constant N at 20*C (m2/d), default = 8.5e-05
+      kPDifDOM: 0.000148                                        # DOM diffusion constant P at 20*C (m2/d), default = 0.00016
+      kSiO2Dif: 0                                               # SiO2 diffusion constant at 20*C (m2/d), default = 8.64e-05
+      hypsograph: true                                          # indicate hypsograph presence/absence (true or false)
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sNH4S: 50                                                 # ammonium (g/m2)
+      sNO3S: 0.05                                               # nitrate (g/m2)
+      sPO4S: 0.45                                               # phosphate (g/m2)
+      sPAIMS: 16                                                # absorbed phosphate (g/m2)
+      sDIMS: 33000                                              # inorganic matter (g/m2)
+      sDDOMS: 0.7                                               # dissolved organic matter (g/m2)
+      sNDOMS: 0.1                                               # dissolved organic N (g/m2)
+      sPDOMS: 0.3                                               # dissolved organic P (g/m2)
+      sSiO2S: 0.8                                               # dissolved SiO2 (g/m2)
+      sDPOMS: 30                                                # particulate organic DW (g/m2)
+      sNPOMS: 1.0                                               # particulate organic N (g/m2)
+      sPPOMS: 1.5                                               # particulate organic P (g/m2)
+      sDPOMS_PV: 150                                            # particulate organic DW pel. var. (g/m2)
+      sNPOMS_PV: 4                                              # particulate organic N pel. var. (g/m2)
+      sPPOMS_PV: 2                                              # particulate organic P pel. var. (g/m2)
+      sSiPaS: 1                                                 # particulate Si (g/m2)
+      sDHumS: 462200.0                                          # humus DW (g/m2) ~1055
+      sNHumS: 76440.0                                           # humus N (g/m2)
+      sPHumS: 1990.5                                            # humus P (g/m2)
+    coupling:                                                   # coupling
+      oxygen_pool_water: abiotic_water/sO2W                     # Oxygen pool water (g/m3)
+      water_column_NH4: abiotic_water/sNH4W                     # water column NH4 (g/m3)
+      water_column_NO3: abiotic_water/sNO3W                     # water column NO3 (g/m3)
+      water_column_PO4: abiotic_water/sPO4W                     # water column PO4 (g/m3)
+      water_column_DDOM: abiotic_water/sDDOMW                   # water column DDOM (g/m3)
+      water_column_NDOM: abiotic_water/sNDOMW                   # water column NDOM (g/m3)
+      water_column_PDOM: abiotic_water/sPDOMW                   # water column PDOM (g/m3)
+      water_column_SiO2: abiotic_water/sSiO2W                   # water column SiO2 (g/m3)
+  burial:                                                       #
+    long_name: burial                                           # long name
+    model: wet/burial                                           # model
+    parameters:                                                 # parameters
+      cRhoIM: 2500000                                           # density of sediment inorganic matter (g/m3), default = 2500000.0
+      cRhoOM: 1500000                                           # density of sediment organic matter (g/m3), default = 1400000.0
+      fDOrgSoil: 0.1                                            # deep sediment organic matter fraction (-), default = 0.1
+      cPO4Ground: 0.10787                                       # PO4 concentration in groundwater (mgP/l), default = 0.1
+      cNH4Ground: 1.4356                                        # NH4 concentration in groundwater (mgN/l), default = 1.0
+      cNO3Ground: 0.11636                                       # NO3 concentration in groundwater (mgN/l), default = 0.1
+      diagnostics: true                                         # add additional output
+    coupling:                                                   # coupling
+      ammonium_pool_in_sediment: abiotic_sediment/sNH4S         # ammonium pool in sediment (g/m2)
+      nitrate_pool_in_sediment: abiotic_sediment/sNO3S          # nitrate pool in sediment (g/m2)
+      phosphate_pool_in_sediment: abiotic_sediment/sPO4S        # phosphate pool in sediment (g/m2)
+      adsorbed_phosphorus_in_sediment: abiotic_sediment/sPAIMS  # adsorbed phosphorus in sediment (g/m2)
+      inorg_pool_in_sediment: abiotic_sediment/sDIMS            # inorganic matter pool in sediment (g/m2)
+      POM_DW_in_sediment: abiotic_sediment/sDPOMS               # POM DW in sediment (g/m2)
+      POM_N_in_sediment: abiotic_sediment/sNPOMS                # POM N in sediment (g/m2)
+      POM_P_in_sediment: abiotic_sediment/sPPOMS                # POM P in sediment (g/m2)
+      POM_DW_in_sediment_PV: abiotic_sediment/sDPOMS_PV         # POM DW pel. var in sediment (g/m2)
+      POM_N_in_sediment_PV: abiotic_sediment/sNPOMS_PV          # POM N pel. var in sediment (g/m2)
+      POM_P_in_sediment_PV: abiotic_sediment/sPPOMS_PV          # POM P pel. var in sediment (g/m2)
+      DOM_DW_in_sediment: abiotic_sediment/sDDOMS               # POM DW in sediment (g/m2)
+      DOM_N_in_sediment: abiotic_sediment/sNDOMS                # POM N in sediment (g/m2)
+      DOM_P_in_sediment: abiotic_sediment/sPDOMS                # POM P in sediment (g/m2)
+      particulate_Si_in_sediment: abiotic_sediment/sSiPaS       # Particulate Si in sediment (g/m2)
+      humus_DW_in_sediment: abiotic_sediment/sDHumS             # humus DW in sediment (g/m2)
+      humus_N_in_sediment: abiotic_sediment/sNHumS              # humus N in sediment (g/m2)
+      humus_P_in_sediment: abiotic_sediment/sPHumS              # humus P in sediment (g/m2)
+      POM_abiotic_update: abiotic_sediment/tDAbioPOMS           # POM abiotic update (g/m2/s)
+      POM_resus_sed: resus_sed/tDAbioPOMS                       # POM from net sedimentation (g/m2/s)
+      humus_abiotic_update: abiotic_sediment/tDAbioHumS         # humus abiotic update (g/m2/s)
+      IM_abiotic_update: resus_sed/tDAbioIMS                    # IM abiotic update (g/m2/s)
+      bPorS: abiotic_sediment/bPorS                             # sediment porosity (m3/m3)
+      cDepthS: abiotic_sediment/cDepthS                         # sediment depth (m)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor
+  resus_sed:                                                    #
+    long_name: resuspension_sedimentation                       # long name
+    model: wet/resus_sed                                        # model
+    parameters:                                                 # parameters
+      kVegResus: 0.04999                                        # relative resuspension reduction per gram macrophytes (m2/gDW), default = 0.05
+      qResus: 2                                                 # 1=original PCLake; 2=based on shear stress (-), default = 2
+      cSuspRef: 0.0                                             # qResus = 1; reference suspended matter function (-), default = 0.0
+      cSuspMin: 6.1                                             # qResus = 1; minimum value of logistic function (-), default = 6.1
+      cSuspMax: 25.2                                            # qResus = 1; maximum value of logistic function (-), default = 25.2
+      cSuspSlope: 2.1                                           # qResus = 1; slope of logistic function (-), default = 2.1
+      hDepthSusp: 2.0                                           # qResus = 1; half-sat. value of depth in logistic function (-), default = 2.0
+      cFetchRef: 1000.0                                         # qResus = 1; reference fetch (m), default = 1000.0
+      cFetch: 8000.0                                            # qResus = 1; length of water body in prevailing wind direction (m), default = 1000.0
+      crt_shear: 0.020895                                       # qResus = 2; critical shear stress (N/m), default = 0.02
+      ref_shear: 1.0241                                         # qResus = 2; reference shear stress (N/m), default = 1.0
+      alpha: 9222.0                                             # qResus = 2; gross rate of sediment erosion (g/m/d), default = 9000.0
+      eta: 0.5164                                               # qResus = 2; shear stress correction factor (-), default = 1.0
+      cVSetMain: 0.4757                                         # qResus = 2; depth averaged settling velocity (m/d), default = 0.5
+      fLutum: 0.09737                                           # lutum fraction of inorganic matter (-), default = 0.1
+      fLutumRef: 0.20993                                        # reference lutum fraction of inorganic matter (-), default = 0.2
+      cThetaSed: 1.0095                                         # temperature coefficient of sedimentation (1/e^*C), default = 1.01
+      cVSedIM: 0.9732                                           # IM sedimentation velocity constant at 20*C (m/d), default = 1.0
+      cVSedPOM: 4.059                                           # POM sedimentation velocity constant at 20*C (m/d), default = 0.5
+      diagnostics: true                                        # add additional output
+    coupling:                                                   # coupling
+      inorg_pool_in_sediment: abiotic_sediment/sDIMS            # sediment inorganic matter (g/m2)
+      POM_DW_in_sediment: abiotic_sediment/sDPOMS               # POM DW in sediment (g/m2)
+      POM_N_in_sediment: abiotic_sediment/sNPOMS                # POM N in sediment (g/m2)
+      POM_P_in_sediment: abiotic_sediment/sPPOMS                # POM P in sediment (g/m2)
+      POM_DW_in_sediment_PV: abiotic_sediment/sDPOMS_PV         # POM DW pel. var in sediment (g/m2)
+      POM_N_in_sediment_PV: abiotic_sediment/sNPOMS_PV          # POM N pel. var in sediment (g/m2)
+      POM_P_in_sediment_PV: abiotic_sediment/sPPOMS_PV          # POM P pel. var in sediment (g/m2)
+      PO4_in_sediment: abiotic_sediment/sPO4S                   # sediment phosphate (g/m2)
+      adsorbed_phosphorus_in_sediment: abiotic_sediment/sPAIMS  # sediment absorbed phosphate (g/m2)
+      NH4_in_sediment: abiotic_sediment/sNH4S                   # sediment ammonium (g/m2)
+      NO3_in_sediment: abiotic_sediment/sNO3S                   # sediment nitrate (g/m2)
+      particulate_Si_in_sediment: abiotic_sediment/sSiPaS       # sediment particulate Si (g/m2)
+      particulate_Si_in_water: abiotic_water/sSiPaW             # water particulate Si (g/m2)
+      NH4_in_water: abiotic_water/sNH4W                         # water NH4 (g/m3)
+      NO3_in_water: abiotic_water/sNO3W                         # water NO3 (g/m3)
+      PO4_in_water: abiotic_water/sPO4W                         # water PO4 (g/m3)
+      inorg_pool_in_water: abiotic_water/sDIMW                  # inorganic matter pool in water (g/m3)
+      adsorbed_phosphorus_in_water: abiotic_water/sPAIMW        # adsorbed phosphorus in water (g/m3)
+      POM_DW_in_water: abiotic_water/sDPOMW                     # POM DW in water (g/m3)
+      POM_N_in_water: abiotic_water/sNPOMW                      # POM N in water (g/m3)
+      POM_P_in_water: abiotic_water/sPPOMW                      # POM P in water (g/m3)
+      bPorS: abiotic_sediment/bPorS                             # sediment porosity (m3/m3)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor (-)
+  Diatom:                                                       #
+    long_name: Diatoms                                          # long name
+    model: wet/phytoplankton                                    # model
+    parameters:                                                 # parameters
+      qLightMethod: 2                                           # lightmethod 1=no photoinhibition; 2=photoinhibition (-), default = 2
+      hLRef: 20                                                 # qLightMethod=1; half-sat. PAR at 20*C; Lehmann function (W/m2), default = 17.0
+      cLOptRef: 7.416                                           # qLightMethod=2; optimum PAR at 20*C; Steele function (W/m2), default = 25.0
+      lSi: false                                                # toggle Si usage (-), default = false
+      hSiAss: 0                                                 # half-saturation constant for Si; only for lSi=.true. (mgSi/l), default = 0.09
+      cSiD: 0                                                   # lSi=.true.; Si/DW ratio (mgSi/mgDW), default = 0.15
+      lNfix: false                                              # toggle nitrogen fixation (-), default = false
+      cNFixMax: 0.01                                            # lNfix=.true.; maximum N fixation rate (mgN/mgDW/d), default = 0.01
+      fMuNFix: 0.9                                              # lNfix=.true.; fraction of MuMax at max N fix. (-), default = 0.9
+      cVPUptMax: 0.0433                                         # P uptake capacity at 20*C (mgP/mgDW/d), default = 0.04
+      cAffPUpt: 1.0948                                          # P uptake affinity (l/mgDW/d), default = 0.8
+      cVNUptMax: 0.09507                                        # N uptake capacity at 20*C (mgN/mgDW/d), default = 0.08 
+      cAffNUpt: 0.27359                                         # N uptake affinity (l/mgDW/d), default = 0.2
+      cDMinW: 0.0005819                                         # minimum DW concentration in water (gDW/m3), default = 1e-05
+      cExtSp: 0.3534                                            # specific extinction coefficient (m2/gDW), default = 0.35
+      qTrans: 1                                                 # Taxis method (1=const.; 2=Nut. taxis; 3=Light taxis; 4=N&L) (-), default = 0
+      cVSwim: 0.1                                               # qTrans > 1; vertical swimming speed (m/d), default = 10
+      fLVMmin: 0.025                                            # qTrans > 2; minimum detectable PAR level (W/m2), default = 0.025
+      fNutLimVMdown: 0.675                                      # qTrans > 3 or 4; threshold nut. limitation for downwards taxis (-), default = 0.675
+      fNutLimVMup: 0.75                                         # qTrans > 2 or 4; threshold nut. limitation for upwards taxis (-), default = 0.75
+      cVSet: -0.06953                                           # qTrans = 1; settling rate, NOTE: negative in case of sinking (m/d), default = 0.05
+      cMuMax: 5.023                                             # maximum growth rate at 20*C (1/d), default = 1.4
+      kDResp: 0.019662                                          # maintenance respiration constant at 20*C (1/d), default = 0.03
+      kMortW: 0.010752                                          # mortality constant in water (1/d), default = 0.01
+      cSigTm: 4.661                                             # growth rate temperature constant; sigma in Gaussian curve (*C), default = 11.6; 6.8
+      cTmOpt: 16.626                                            # optimum temperature of growth rate (*C), default = 25.0
+      cPDMin: 0.0020983                                         # minimum P/DW ratio (mgP/mgDW), default = 0.003
+      cPDMax: 0.028764                                          # maximum P/DW ratio (mgP/mgDW), default = 0.025
+      cNDMin: 0.018092                                          # minimum N/DW ratio (mgN/mgDW), default = 0.018
+      cNDMax: 0.17144                                           # maximum N/DW ratio (mgN/mgDW), default = 0.15 ;0.48
+      fDissMort: 0.16888                                        # soluble inorganic nutrient fraction of dead cells (-), default = 0.2
+      cCPerDW: 0.371                                            # C content of organic matter DW (gC/gDW), default = 0.4
+      hO2BOD: 0.9823                                            # half-saturation constant for oxygen conc. on BOD (mgO2/l), default = 1.0 ;0.11
+      cChDMin: 0.0012602                                        # minimum chlorophyll/C ratio (mgChl/mgDW), default = 0.005
+      cChDMax: 0.018237                                         # maximum chlorophyll/C ratio (mgChl/mgDW), default = 0.015
+      fDOMW: 0.17193                                            # DOM fraction of dead cells (-), default = 0.0
+      kMortS: 0.2                                               # mortality rate of settled phytoplankton (1/d), default = 0.2
+      fDOMS: 0.17836                                            # DOM fraction of settled dead cells (-), default = 0.0
+      cDMinS: 1e-05                                             # minimum DW concentration in sediment (gDW/m3), default = 1e-05
+      cResusExp: -0.379                                         # exponent parameter for phytoplankton resuspension (1/(gDW/m2/d)), default = -0.379
+      kResusMax: 0.25                                           # maximum phytoplankton resuspension rate (1/d), default = 0.25
+      cVSed: 0.23988                                            # sedimentation velocity (m/d), default = 0.2
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sDW: 0.00102                                              # water column DW (gDW/m3)
+      sNW: 0.000102                                             # water column N (gN/m3)
+      sPW: 3.5e-06                                              # water column P (gP/m3)
+      sDS: 0.0003                                               # sediment DW (gDW/m2)
+      sNS: 1.2e-05                                              # sediment N (gN/m2)
+      sPS: 6.1e-07                                              # sediment P (gP/m2)
+      sDS_PV: 0.0018                                            # sediment DW pel. var. (gDW/m2)
+      sNS_PV: 0.00029                                           # sediment N pel. var. (gN/m2)
+      sPS_PV: 2.9e-05                                           # sediment P pel. var. (gP/m2)
+    coupling:                                                   # coupling
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # oxygen_pool_water) (g/m3)
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P water (g/m3)
+      PO4_pool_sediment: abiotic_sediment/sPO4S                 # PO4 pool in sediment (g/m2)
+      NO3_pool_sediment: abiotic_sediment/sNO3S                 # NO3 pool in sediment (g/m2)
+      NH4_pool_sediment: abiotic_sediment/sNH4S                 # NH4 pool in sediment (g/m2)
+      POM_DW_pool_sediment: abiotic_sediment/sDPOMS             # POM DW pool in sediment (g/m2)
+      POM_N_pool_sediment: abiotic_sediment/sNPOMS              # POM N pool in sediment (g/m2)
+      POM_P_pool_sediment: abiotic_sediment/sPPOMS              # POM P pool in sediment (g/m2)
+      POM_DW_pool_sediment_PV: abiotic_sediment/sDPOMS_PV       # POM DW pel. var in sediment (g/m2)
+      POM_N_pool_sediment_PV: abiotic_sediment/sNPOMS_PV        # POM N pel. var pool sediment (g/m2)
+      POM_P_pool_sediment_PV: abiotic_sediment/sPPOMS_PV        # POM P pel. var pool sediment (g/m2)
+      DOM_DW_pool_sediment: abiotic_sediment/sDDOMS             # DOM DW in sediment (g/m2)
+      DOM_N_pool_sediment: abiotic_sediment/sNDOMS              # DOM N in sediment (g/m2)
+      DOM_P_pool_sediment: abiotic_sediment/sPDOMS              # DOM P in sediment (g/m2)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # SiPa pool water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 pool water (g/m3)
+      SiPa_pool_sediment: abiotic_sediment/sSiPaS               # SiPa pool in sediment (g/m2)
+      SiO2_pool_sediment: abiotic_sediment/sSiO2S               # SiO2 in sediment (g/m2)
+      base_resuspension_rate: resus_sed/tDResusDead             # base resuspension rate (-)
+      aFunTauTmSet: resus_sed/aFunTauTmSet                      # basic settling rate (-)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor
+  CyanoMC:                                                      #
+    long_name: Microcystis Cyanobacteria                        # long name
+    model: wet/phytoplankton                                    # model
+    parameters:                                                 # parameters
+      qLightMethod: 2                                           # lightmethod 1=no photoinhibition; 2=photoinhibition (-), default = 2
+      hLRef: 20                                                 # qLightMethod=1; half-sat. PAR at 20*C; Lehmann function (W/m2), default = 17.0
+      cLOptRef: 3.96                                            # qLightMethod=2; optimum PAR at 20*C; Steele function (W/m2), default = 25.0
+      lSi: false                                                # toggle Si usage (-), default = false
+      hSiAss: 0                                                 # half-saturation constant for Si; only for lSi=.true. (mgSi/l), default = 0.09
+      cSiD: 0                                                   # lSi=.true.; Si/DW ratio (mgSi/mgDW), default = 0.15
+      lNfix: false                                              # toggle nitrogen fixation (-), default = false
+      cNFixMax: 0.01                                            # lNfix=.true.; maximum N fixation rate (mgN/mgDW/d), default = 0.01
+      fMuNFix: 0.9                                              # lNfix=.true.; fraction of MuMax at max N fix. (-), default = 0.9
+      cVPUptMax: 0.03716                                        # P uptake capacity at 20*C (mgP/mgDW/d), default = 0.04
+      cAffPUpt: 0.5163                                          # P uptake affinity (l/mgDW/d), default = 0.8
+      cVNUptMax: 0.07706                                        # N uptake capacity at 20*C (mgN/mgDW/d), default = 0.08
+      cAffNUpt: 0.20691                                         # N uptake affinity (l/mgDW/d), default = 0.2
+      cDMinW: 0.001472                                          # minimum DW concentration in water (gDW/m3), default = 1e-05
+      cExtSp: 0.3232                                            # specific extinction coefficient (m2/gDW), default = 0.35
+      qTrans: 1                                                 # Taxis method (1=const.; 2=Nut. taxis; 3=Light taxis; 4=N&L) (-), default = 0
+      cVSwim: 0.1                                               # qTrans > 1; vertical swimming speed (m/d), default = 10
+      fLVMmin: 0.025                                            # qTrans > 2; minimum detectable PAR level (W/m2), default = 0.025
+      fNutLimVMdown: 0.675                                      # qTrans > 3 or 4; threshold nut. limitation for downwards taxis (-), default = 0.675
+      fNutLimVMup: 0.75                                         # qTrans > 2 or 4; threshold nut. limitation for upwards taxis (-), default = 0.75
+      cVSet: -0.022251                                          # qTrans = 1; settling rate, NOTE: negative in case of sinking (m/d), default = 0.05
+      cMuMax: 1.1801                                            # maximum growth rate at 20*C (1/d), default = 1.4
+      kDResp: 0.025                                             # maintenance respiration constant at 20*C (1/d), default = 0.03
+      kMortW: 0.01                                              # mortality constant in water (1/d), default = 0.01
+      cSigTm: 3.0184                                            # growth rate temperature constant; sigma in Gaussian curve (*C), default = 11.6
+      cTmOpt: 17.06                                             # optimum temperature of growth rate (*C), default = 25.0
+      cPDMin: 0.003642                                          # minimum P/DW ratio (mgP/mgDW), default = 0.003
+      cPDMax: 0.025475                                          # maximum P/DW ratio (mgP/mgDW), default = 0.025
+      cNDMin: 0.019387                                          # minimum N/DW ratio (mgN/mgDW), default = 0.018
+      cNDMax: 0.15762                                           # maximum N/DW ratio (mgN/mgDW), default = 0.15
+      fDissMort: 0.398                                          # soluble inorganic nutrient fraction of dead cells (-), default = 0.2
+      cCPerDW: 0.374                                            # C content of organic matter DW (gC/gDW), default = 0.4
+      hO2BOD: 0.722                                             # half-saturation constant for oxygen conc. on BOD (mgO2/l), default = 1.0
+      cChDMin: 0.0012602                                        # minimum chlorophyll/C ratio (mgChl/mgDW), default = 0.005
+      cChDMax: 0.018237                                         # maximum chlorophyll/C ratio (mgChl/mgDW), default = 0.015
+      fDOMW: 0.26591                                            # DOM fraction of dead cells (-), default = 0.0
+      kMortS: 0.2                                               # mortality rate of settled phytoplankton (1/d), default = 0.2
+      fDOMS: 0.16361                                            # DOM fraction of settled dead cells (-), default = 0.0
+      cDMinS: 1e-05                                             # minimum DW concentration in sediment (gDW/m3), default = 1e-05
+      cResusExp: -0.379                                         # exponent parameter for phytoplankton resuspension (1/(gDW/m2/d)), default = -0.379
+      kResusMax: 0.25                                           # maximum phytoplankton resuspension rate (1/d), default = 0.25
+      cVSed: 0.24094                                            # sedimentation velocity (m/d), default = 0.2
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sDW: 0.01                                                 # water column DW (gDW/m3)
+      sNW: 0.002                                                # water column N (gN/m3)
+      sPW: 0.0005                                               # water column P (gP/m3)
+      sDS: 0.01                                                 # sediment DW (gDW/m2)
+      sNS: 0.002                                                # sediment N (gN/m2)
+      sPS: 0.0005                                               # sediment P (gP/m2)
+      sDS_PV: 0.1                                               # sediment DW pel. var. (gDW/m2)
+      sNS_PV: 0.008                                             # sediment N pel. var. (gN/m2)
+      sPS_PV: 0.0006                                            # sediment P pel. var. (gP/m2)
+    coupling:                                                   # coupling
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # oxygen_pool_water) (g/m3)
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P water (g/m3)
+      PO4_pool_sediment: abiotic_sediment/sPO4S                 # PO4 pool in sediment (g/m2)
+      NO3_pool_sediment: abiotic_sediment/sNO3S                 # NO3 pool in sediment (g/m2)
+      NH4_pool_sediment: abiotic_sediment/sNH4S                 # NH4 pool in sediment (g/m2)
+      POM_DW_pool_sediment: abiotic_sediment/sDPOMS             # POM DW pool in sediment (g/m2)
+      POM_N_pool_sediment: abiotic_sediment/sNPOMS              # POM N pool in sediment (g/m2)
+      POM_P_pool_sediment: abiotic_sediment/sPPOMS              # POM P pool in sediment (g/m2)
+      POM_DW_pool_sediment_PV: abiotic_sediment/sDPOMS_PV       # POM DW pel. var in sediment (g/m2)
+      POM_N_pool_sediment_PV: abiotic_sediment/sNPOMS_PV        # POM N pel. var pool sediment (g/m2)
+      POM_P_pool_sediment_PV: abiotic_sediment/sPPOMS_PV        # POM P pel. var pool sediment (g/m2)
+      DOM_DW_pool_sediment: abiotic_sediment/sDDOMS             # DOM DW in sediment (g/m2)
+      DOM_N_pool_sediment: abiotic_sediment/sNDOMS              # DOM N in sediment (g/m2)
+      DOM_P_pool_sediment: abiotic_sediment/sPDOMS              # DOM P in sediment (g/m2)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # SiPa pool water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 pool water (g/m3)
+      SiPa_pool_sediment: abiotic_sediment/sSiPaS               # SiPa pool in sediment (g/m2)
+      SiO2_pool_sediment: abiotic_sediment/sSiO2S               # SiO2 in sediment (g/m2)
+      base_resuspension_rate: resus_sed/tDResusDead             # base resuspension rate (-)
+      aFunTauTmSet: resus_sed/aFunTauTmSet                      # basic settling rate (-)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor
+  NfixCyano:                                                    #
+    long_name: N2 Fixer Cyanobacteria                           # long name
+    model: wet/phytoplankton                                    # model
+    parameters:                                                 # parameters
+      qLightMethod: 2                                           # lightmethod 1=no photoinhibition; 2=photoinhibition (-), default = 2
+      hLRef: 17                                                 # qLightMethod=1; half-sat. PAR at 20*C; Lehmann function (W/m2), default = 17.0
+      cLOptRef: 38.89                                           # qLightMethod=2; optimum PAR at 20*C; Steele function (W/m2), default = 25.0
+      lSi: false                                                # toggle Si usage (-), default = false
+      hSiAss: 0                                                 # half-saturation constant for Si; only for lSi=.true. (mgSi/l), default = 0.09
+      cSiD: 0                                                   # lSi=.true.; Si/DW ratio (mgSi/mgDW), default = 0.15
+      lNfix: true                                               # toggle nitrogen fixation (-), default = false
+      cNFixMax: 0.0078                                          # lNfix=.true.; maximum N fixation rate (mgN/mgDW/d), default = 0.01
+      fMuNFix: 0.87                                             # lNfix=.true.; fraction of MuMax at max N fix. (-), default = 0.9
+      cVPUptMax: 0.042                                          # P uptake capacity at 20*C (mgP/mgDW/d), default = 0.04
+      cAffPUpt: 0.711                                           # P uptake affinity (l/mgDW/d), default = 0.8
+      cVNUptMax: 0.018728                                       # N uptake capacity at 20*C (mgN/mgDW/d), default = 0.08
+      cAffNUpt: 0.05641                                         # N uptake affinity (l/mgDW/d), default = 0.2
+      cDMinW: 1.7994e-05                                        # minimum DW concentration in water (gDW/m3), default = 1e-05
+      cExtSp: 0.5046                                            # specific extinction coefficient (m2/gDW), default = 0.35
+      qTrans: 1                                                 # Taxis method (1=const.; 2=Nut. taxis; 3=Light taxis; 4=N&L) (-), default = 0
+      cVSwim: 0.1                                               # qTrans > 1; vertical swimming speed (m/d), default = 10
+      fLVMmin: 0.025                                            # qTrans > 2; minimum detectable PAR level (W/m2), default = 0.025
+      fNutLimVMdown: 0.675                                      # qTrans > 3 or 4; threshold nut. limitation for downwards taxis (-), default = 0.675
+      fNutLimVMup: 0.75                                         # qTrans > 2 or 4; threshold nut. limitation for upwards taxis (-), default = 0.75
+      cVSet: 0.21631                                            # qTrans = 1; settling rate, NOTE: negative in case of sinking (m/d), default = 0.05
+      cMuMax: 1.24                                              # maximum growth rate at 20*C (1/d), default = 1.4
+      kDResp: 0.021374                                          # maintenance respiration constant at 20*C (1/d), default = 0.03
+      kMortW: 0.009747                                          # mortality constant in water (1/d), default = 0.01
+      cSigTm: 4.232                                             # growth rate temperature constant; sigma in Gaussian curve (*C), default = 4.4
+      cTmOpt: 24.8                                              # optimum temperature of growth rate (*C), default = 25.0
+      cPDMin: 0.0015232                                         # minimum P/DW ratio (mgP/mgDW), default = 0.003
+      cPDMax: 0.06215                                           # maximum P/DW ratio (mgP/mgDW), default = 0.025
+      cNDMin: 0.03165                                           # minimum N/DW ratio (mgN/mgDW), default = 0.018
+      cNDMax: 0.13872                                           # maximum N/DW ratio (mgN/mgDW), default = 0.15
+      fDissMort: 0.20608                                        # soluble inorganic nutrient fraction of dead cells (-), default = 0.2
+      cCPerDW: 0.4226                                           # C content of organic matter DW (gC/gDW), default = 0.4
+      hO2BOD: 0.477                                             # half-saturation constant for oxygen conc. on BOD (mgO2/l), default = 1.0
+      cChDMin: 0.005                                            # minimum chlorophyll/C ratio (mgChl/mgDW), default = 0.005
+      cChDMax: 0.015                                            # maximum chlorophyll/C ratio (mgChl/mgDW), default = 0.015
+      fDOMW: 0.23151                                            # DOM fraction of dead cells (-), default = 0.0
+      kMortS: 0.2                                               # mortality rate of settled phytoplankton (1/d), default = 0.2
+      fDOMS: 0.5564                                             # DOM fraction of settled dead cells (-), default = 0.0
+      cDMinS: 1e-05                                             # minimum DW concentration in sediment (gDW/m3), default = 1e-05
+      cResusExp: -0.379                                         # exponent parameter for phytoplankton resuspension (1/(gDW/m2/d)), default = -0.379
+      kResusMax: 0.25                                           # maximum phytoplankton resuspension rate (1/d), default = 0.25
+      cVSed: 0.4881                                             # sedimentation velocity (m/d), default = 0.2
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sDW: 0.02                                                 # water column DW (gDW/m3)
+      sNW: 0.0008                                               # water column N (gN/m3)
+      sPW: 0.0002                                               # water column P (gP/m3)
+      sDS: 0.02                                                 # sediment DW (gDW/m2)
+      sNS: 0.0008                                               # sediment N (gN/m2)
+      sPS: 0.0002                                               # sediment P (gP/m2)
+      sDS_PV: 0.01                                              # sediment DW pel. var. (gDW/m2)
+      sNS_PV: 0.0008                                            # sediment N pel. var. (gN/m2)
+      sPS_PV: 3e-05                                             # sediment P pel. var. (gP/m2)
+    coupling:                                                   # coupling
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # oxygen_pool_water) (g/m3)
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P water (g/m3)
+      PO4_pool_sediment: abiotic_sediment/sPO4S                 # PO4 pool in sediment (g/m2)
+      NO3_pool_sediment: abiotic_sediment/sNO3S                 # NO3 pool in sediment (g/m2)
+      NH4_pool_sediment: abiotic_sediment/sNH4S                 # NH4 pool in sediment (g/m2)
+      POM_DW_pool_sediment: abiotic_sediment/sDPOMS             # POM DW pool in sediment (g/m2)
+      POM_N_pool_sediment: abiotic_sediment/sNPOMS              # POM N pool in sediment (g/m2)
+      POM_P_pool_sediment: abiotic_sediment/sPPOMS              # POM P pool in sediment (g/m2)
+      POM_DW_pool_sediment_PV: abiotic_sediment/sDPOMS_PV       # POM DW pel. var in sediment (g/m2)
+      POM_N_pool_sediment_PV: abiotic_sediment/sNPOMS_PV        # POM N pel. var pool sediment (g/m2)
+      POM_P_pool_sediment_PV: abiotic_sediment/sPPOMS_PV        # POM P pel. var pool sediment (g/m2)
+      DOM_DW_pool_sediment: abiotic_sediment/sDDOMS             # DOM DW in sediment (g/m2)
+      DOM_N_pool_sediment: abiotic_sediment/sNDOMS              # DOM N in sediment (g/m2)
+      DOM_P_pool_sediment: abiotic_sediment/sPDOMS              # DOM P in sediment (g/m2)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # SiPa pool water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 pool water (g/m3)
+      SiPa_pool_sediment: abiotic_sediment/sSiPaS               # SiPa pool in sediment (g/m2)
+      SiO2_pool_sediment: abiotic_sediment/sSiO2S               # SiO2 in sediment (g/m2)
+      base_resuspension_rate: resus_sed/tDResusDead             # base resuspension rate (-)
+      aFunTauTmSet: resus_sed/aFunTauTmSet                      # basic settling rate (-)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor
+  Green:                                                        #
+    long_name: green phytoplankton                              # long name
+    model: wet/phytoplankton                                    # model
+    parameters:                                                 # parameters
+      qLightMethod: 1                                           # lightmethod 1=no photoinhibition; 2=photoinhibition (-), default = 2
+      hLRef: 1.2159                                             # qLightMethod=1; half-sat. PAR at 20*C; Lehmann function (W/m2), default = 17.0
+      cLOptRef: 65                                              # qLightMethod=2; optimum PAR at 20*C; Steele function (W/m2), default = 25.0
+      lSi: false                                                # toggle Si usage (-), default = false
+      hSiAss: 0                                                 # half-saturation constant for Si; only for lSi=.true. (mgSi/l), default = 0.09
+      cSiD: 0                                                   # lSi=.true.; Si/DW ratio (mgSi/mgDW), default = 0.15
+      lNfix: false                                              # toggle nitrogen fixation (-), default = false
+      cNFixMax: 0.01                                            # lNfix=.true.; maximum N fixation rate (mgN/mgDW/d), default = 0.01
+      fMuNFix: 0.9                                              # lNfix=.true.; fraction of MuMax at max N fix. (-), default = 0.9
+      cVPUptMax: 0.07818                                        # P uptake capacity at 20*C (mgP/mgDW/d), default = 0.04
+      cAffPUpt: 1.7861                                          # P uptake affinity (l/mgDW/d), default = 0.8
+      cVNUptMax: 0.13305                                        # N uptake capacity at 20*C (mgN/mgDW/d), default = 0.08
+      cAffNUpt: 0.25624                                         # N uptake affinity (l/mgDW/d), default = 0.2
+      cDMinW: 1e-05                                             # minimum DW concentration in water (gDW/m3), default = 1e-05
+      cExtSp: 0.20136                                           # specific extinction coefficient (m2/gDW), default = 0.35
+      qTrans: 1                                                 # Taxis method (1=const.; 2=Nut. taxis; 3=Light taxis; 4=N&L) (-), default = 0
+      cVSwim: 0.1                                               # qTrans > 1; vertical swimming speed (m/d), default = 10
+      fLVMmin: 0.025                                            # qTrans > 2; minimum detectable PAR level (W/m2), default = 0.025
+      fNutLimVMdown: 0.675                                      # qTrans > 3 or 4; threshold nut. limitation for downwards taxis (-), default = 0.675
+      fNutLimVMup: 0.75                                         # qTrans > 2 or 4; threshold nut. limitation for upwards taxis (-), default = 0.75
+      cVSet: -0.6497                                            # qTrans = 1; settling rate, NOTE: negative in case of sinking (m/d), default = 0.05
+      cMuMax: 2.5892                                            # maximum growth rate at 20*C (1/d), default = 1.4
+      kDResp: 0.02984                                           # maintenance respiration constant at 20*C (1/d), default = 0.03
+      kMortW: 0.010014                                          # mortality constant in water (1/d), default = 0.01
+      cSigTm: 13.478                                            # growth rate temperature constant; sigma in Gaussian curve (*C), default = 11.6
+      cTmOpt: 21.552                                            # optimum temperature of growth rate (*C), default = 25.0
+      cPDMin: 0.003                                             # minimum P/DW ratio (mgP/mgDW), default = 0.003 ; 0.0007
+      cPDMax: 0.08048                                           # maximum P/DW ratio (mgP/mgDW), default = 0.025 ; 0.0135
+      cNDMin: 0.020564                                          # minimum N/DW ratio (mgN/mgDW), default = 0.018 ; 0.005
+      cNDMax: 0.17293                                           # maximum N/DW ratio (mgN/mgDW), default = 0.15 ; 0.11
+      fDissMort: 0.14069                                        # soluble inorganic nutrient fraction of dead cells (-), default = 0.2
+      cCPerDW: 0.649                                            # C content of organic matter DW (gC/gDW), default = 0.4
+      hO2BOD: 0.7625                                            # half-saturation constant for oxygen conc. on BOD (mgO2/l), default = 1.0
+      cChDMin: 0.003268                                         # minimum chlorophyll/C ratio (mgChl/mgDW), default = 0.005
+      cChDMax: 0.015861                                         # maximum chlorophyll/C ratio (mgChl/mgDW), default = 0.015
+      fDOMW: 0.2323                                             # DOM fraction of dead cells (-), default = 0.0
+      kMortS: 0.05                                              # mortality rate of settled phytoplankton (1/d), default = 0.2
+      fDOMS: 0.3721                                             # DOM fraction of settled dead cells (-), default = 0.0
+      cDMinS: 1e-05                                             # minimum DW concentration in sediment (gDW/m3), default = 1e-05
+      cResusExp: -0.379                                         # exponent parameter for phytoplankton resuspension (1/(gDW/m2/d)), default = -0.379
+      kResusMax: 0.25                                           # maximum phytoplankton resuspension rate (1/d), default = 0.25
+      cVSed: 0.3395                                             # sedimentation velocity (m/d), default = 0.2
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sDW: 0.6                                                  # water column DW (gDW/m3)
+      sNW: 0.06                                                 # water column N (gN/m3)
+      sPW: 0.008                                                # water column P (gP/m3)
+      sDS: 2.5                                                  # sediment DW (gDW/m2)
+      sNS: 0.16                                                 # sediment N (gN/m2)
+      sPS: 0.012                                                # sediment P (gP/m2)
+      sDS_PV: 1                                                 # sediment DW pel. var. (gDW/m2)
+      sNS_PV: 0.08                                              # sediment N pel. var. (gN/m2)
+      sPS_PV: 0.01                                              # sediment P pel. var. (gP/m2)
+    coupling:                                                   # coupling
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # oxygen_pool_water) (g/m3)
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P water (g/m3)
+      PO4_pool_sediment: abiotic_sediment/sPO4S                 # PO4 pool in sediment (g/m2)
+      NO3_pool_sediment: abiotic_sediment/sNO3S                 # NO3 pool in sediment (g/m2)
+      NH4_pool_sediment: abiotic_sediment/sNH4S                 # NH4 pool in sediment (g/m2)
+      POM_DW_pool_sediment: abiotic_sediment/sDPOMS             # POM DW pool in sediment (g/m2)
+      POM_N_pool_sediment: abiotic_sediment/sNPOMS              # POM N pool in sediment (g/m2)
+      POM_P_pool_sediment: abiotic_sediment/sPPOMS              # POM P pool in sediment (g/m2)
+      POM_DW_pool_sediment_PV: abiotic_sediment/sDPOMS_PV       # POM DW pel. var in sediment (g/m2)
+      POM_N_pool_sediment_PV: abiotic_sediment/sNPOMS_PV        # POM N pel. var pool sediment (g/m2)
+      POM_P_pool_sediment_PV: abiotic_sediment/sPPOMS_PV        # POM P pel. var pool sediment (g/m2)
+      DOM_DW_pool_sediment: abiotic_sediment/sDDOMS             # DOM DW in sediment (g/m2)
+      DOM_N_pool_sediment: abiotic_sediment/sNDOMS              # DOM N in sediment (g/m2)
+      DOM_P_pool_sediment: abiotic_sediment/sPDOMS              # DOM P in sediment (g/m2)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # SiPa pool water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 pool water (g/m3)
+      SiPa_pool_sediment: abiotic_sediment/sSiPaS               # SiPa pool in sediment (g/m2)
+      SiO2_pool_sediment: abiotic_sediment/sSiO2S               # SiO2 in sediment (g/m2)
+      base_resuspension_rate: resus_sed/tDResusDead             # base resuspension rate (-)
+      aFunTauTmSet: resus_sed/aFunTauTmSet                      # basic settling rate (-)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor
+  Dino:                                                         #
+    long_name: Dinoflagellates phytoplankton                    # long name
+    model: wet/phytoplankton                                    # model
+    parameters:                                                 # parameters
+      qLightMethod: 2                                           # lightmethod 1=no photoinhibition; 2=photoinhibition (-), default = 2
+      hLRef: 17.0                                               # qLightMethod=1; half-sat. PAR at 20*C; Lehmann function (W/m2), default = 17.0
+      cLOptRef: 5.617                                           # qLightMethod=2; optimum PAR at 20*C; Steele function (W/m2), default = 25.0
+      lSi: true                                                 # toggle Si usage (-), default = false
+      hSiAss: 0.20504                                           # half-saturation constant for Si; only for lSi=.true. (mgSi/l), default = 0.09
+      cSiD: 0.1734                                              # lSi=.true.; Si/DW ratio (mgSi/mgDW), default = 0.15
+      lNfix: false                                              # toggle nitrogen fixation (-), default = false
+      cNFixMax: 0.01                                            # lNfix=.true.; maximum N fixation rate (mgN/mgDW/d), default = 0.01
+      fMuNFix: 0.9                                              # lNfix=.true.; fraction of MuMax at max N fix. (-), default = 0.9
+      cVPUptMax: 0.4347                                         # P uptake capacity at 20*C (mgP/mgDW/d), default = 0.04
+      cAffPUpt: 0.5435                                          # P uptake affinity (l/mgDW/d), default = 0.8
+      cVNUptMax: 0.0815                                         # N uptake capacity at 20*C (mgN/mgDW/d), default = 0.08 b4:0.18
+      cAffNUpt: 0.5034                                          # N uptake affinity (l/mgDW/d), default = 0.2 b4:0.72
+      cDMinW: 1e-05                                             # minimum DW concentration in water (gDW/m3), default = 1e-05
+      cExtSp: 0.18761                                           # specific extinction coefficient (m2/gDW), default = 0.35
+      qTrans: 4                                                 # Taxis method (1=const.; 2=Nut. taxis; 3=Light taxis; 4=N&L) (-), default = 0
+      cVSwim: 0.08293                                           # qTrans > 1; vertical swimming speed (m/d), default = 10
+      fLVMmin: 0.04371                                          # qTrans > 2; minimum detectable PAR level (W/m2), default = 0.025
+      fNutLimVMdown: 0.6284                                     # qTrans > 3 or 4; threshold nut. limitation for downwards taxis (-), default = 0.675
+      fNutLimVMup: 0.7079                                       # qTrans > 2 or 4; threshold nut. limitation for upwards taxis (-), default = 0.75
+      cVSet: 0.06564                                            # qTrans = 1; settling rate, NOTE: negative in case of sinking (m/d), default = 0.05
+      cMuMax: 5.828                                             # maximum growth rate at 20*C (1/d), default = 1.4
+      kDResp: 0.14021                                           # maintenance respiration constant at 20*C (1/d), default = 0.03
+      kMortW: 0.031104                                          # mortality constant in water (1/d), default = 0.01
+      cSigTm: 5.937                                             # growth rate temperature constant; sigma in Gaussian curve (*C), default = 11.6
+      cTmOpt: 12.89                                             # optimum temperature of growth rate (*C), default = 25.0
+      cPDMin: 0.0008932                                         # minimum P/DW ratio (mgP/mgDW), default = 0.003
+      cPDMax: 0.031122                                          # maximum P/DW ratio (mgP/mgDW), default = 0.025
+      cNDMin: 0.022019                                          # minimum N/DW ratio (mgN/mgDW), default = 0.018
+      cNDMax: 0.025725                                          # maximum N/DW ratio (mgN/mgDW), default = 0.15
+      fDissMort: 0.03646                                        # soluble inorganic nutrient fraction of dead cells (-), default = 0.2
+      cCPerDW: 0.39                                             # C content of organic matter DW (gC/gDW), default = 0.4
+      hO2BOD: 1.3595                                            # half-saturation constant for oxygen conc. on BOD (mgO2/l), default = 1.0
+      cChDMin: 0.003441                                         # minimum chlorophyll/C ratio (mgChl/mgDW), default = 0.005
+      cChDMax: 0.017474                                         # maximum chlorophyll/C ratio (mgChl/mgDW), default = 0.015
+      fDOMW: 0.29464                                            # DOM fraction of dead cells (-), default = 0.0
+      kMortS: 2                                                 # mortality rate of settled phytoplankton (1/d), default = 0.2
+      fDOMS: 0.23178                                            # DOM fraction of settled dead cells (-), default = 0.0
+      cDMinS: 1e-05                                             # minimum DW concentration in sediment (gDW/m3), default = 1e-05
+      cResusExp: -0.379                                         # exponent parameter for phytoplankton resuspension (1/(gDW/m2/d)), default = -0.379
+      kResusMax: 0.25                                           # maximum phytoplankton resuspension rate (1/d), default = 0.25
+      cVSed: 0.19043                                            # sedimentation velocity (m/d), default = 0.2
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sDW: 0.11                                                 # water column DW (gDW/m3)
+      sNW: 0.065                                                # water column N (gN/m3)
+      sPW: 0.0012                                               # water column P (gP/m3)
+      sDS: 0.05                                                 # sediment DW (gDW/m2)
+      sNS: 0.03                                                 # sediment N (gN/m2)
+      sPS: 0.00055                                              # sediment P (gP/m2)
+      sDS_PV: 3                                                 # sediment DW pel. var. (gDW/m2)
+      sNS_PV: 0.12                                              # sediment N pel. var. (gN/m2)
+      sPS_PV: 0.04                                              # sediment P pel. var. (gP/m2)
+    coupling:                                                   # coupling
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # oxygen_pool_water) (g/m3)
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P water (g/m3)
+      PO4_pool_sediment: abiotic_sediment/sPO4S                 # PO4 pool in sediment (g/m2)
+      NO3_pool_sediment: abiotic_sediment/sNO3S                 # NO3 pool in sediment (g/m2)
+      NH4_pool_sediment: abiotic_sediment/sNH4S                 # NH4 pool in sediment (g/m2)
+      POM_DW_pool_sediment: abiotic_sediment/sDPOMS             # POM DW pool in sediment (g/m2)
+      POM_N_pool_sediment: abiotic_sediment/sNPOMS              # POM N pool in sediment (g/m2)
+      POM_P_pool_sediment: abiotic_sediment/sPPOMS              # POM P pool in sediment (g/m2)
+      POM_DW_pool_sediment_PV: abiotic_sediment/sDPOMS_PV       # POM DW pel. var in sediment (g/m2)
+      POM_N_pool_sediment_PV: abiotic_sediment/sNPOMS_PV        # POM N pel. var pool sediment (g/m2)
+      POM_P_pool_sediment_PV: abiotic_sediment/sPPOMS_PV        # POM P pel. var pool sediment (g/m2)
+      DOM_DW_pool_sediment: abiotic_sediment/sDDOMS             # DOM DW in sediment (g/m2)
+      DOM_N_pool_sediment: abiotic_sediment/sNDOMS              # DOM N in sediment (g/m2)
+      DOM_P_pool_sediment: abiotic_sediment/sPDOMS              # DOM P in sediment (g/m2)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # SiPa pool water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 pool water (g/m3)
+      SiPa_pool_sediment: abiotic_sediment/sSiPaS               # SiPa pool in sediment (g/m2)
+      SiO2_pool_sediment: abiotic_sediment/sSiO2S               # SiO2 in sediment (g/m2)
+      base_resuspension_rate: resus_sed/tDResusDead             # base resuspension rate (-)
+      aFunTauTmSet: resus_sed/aFunTauTmSet                      # basic settling rate (-)
+      bot_pel_conv: abiotic_sediment/bot_pel_conv               # bottom/pelagic conversion factor
+  HerbZoo:                                                      #
+    long_name: Herbivorous Zooplankton                          # long name
+    model: wet/zooplankton                                      # model
+    parameters:                                                 # parameters
+      nPrey: 4                                                  # number of prey types (-), default = 1
+      prey_suffix1: W                                           #  prey 1 name suffix(W=Water; S=Sediment; POMW = POM), default = ''
+      prey_suffix2: W                                           #  prey 2 name suffix(W=Water; S=Sediment; POMW = POM), default = ''
+      prey_suffix3: W                                           #  prey 3 name suffix(W=Water; S=Sediment; POMW = POM), default = ''
+      prey_suffix4: POMW                                        #  prey 4 name suffix(W=Water; S=Sediment; POMW = POM), default =W
+      cClearPrey1: 6.8                                          #  clearance rate for prey 1 (m3/gDW/d), default = 2.0
+      cClearPrey2: 2.0                                          #  clearance rate for prey 2 (m3/gDW/d), default = 2.0
+      cClearPrey3: 5.2                                          #  clearance rate for prey 3 (m3/gDW/d), default = 2.0
+      cClearPrey4: 0.4                                          #  clearance rate for prey 4 (m3/gDW/d), default = 2.0
+      fGutOccPrey1: 0.1                                         #  gut occupation factor for prey 1 (-), default = 1.0
+      fGutOccPrey2: 0.1                                         #  gut occupation factor for prey 2 (-), default = 1.0
+      fGutOccPrey3: 0.7                                         #  gut occupation factor for prey 3 (-), default = 1.0
+      fGutOccPrey4: 0.1                                         #  gut occupation factor for prey 4 (-), default = 1.0
+      lSi1: false                                               #  toggle prey 1 silica tracking (-), default = false
+      lSi2: false                                               #  toggle prey 2 silica tracking (-), default = false
+      lSi3: false                                               #  toggle prey 3 silica tracking (-), default = false
+      lSi4: false                                               #  toggle prey 4 silica tracking (-), default = false
+      qODB: 1                                                   #  toggle optimal diet breadth: 0=off; 1=on(-), default = 1
+      kDConsMaxZoo: 0.6924                                      #  standard dry weight specific maximum consumption rate(gDW/gDW/d), default = 0.5
+      cDCarrZoo: 25.0                                           # carrying capacity (g/m3), default = 25.0
+      cDMinZoo: 1e-05                                           # minimum DW concentration (gDW/m3), default = 1e-05
+      qTrans: 2                                                 # vert. trans. method: 1=passive; 2=O2; 3=O2 & Light (-), default = 2
+      cMinO2: 1.4484                                            # qtrans > 1; oxygen conc. limit (gO2/m3), default = 2.0
+      cMinLight: 40                                             # qtrans = 3; light level triggering upwards swimming (W/m2), default = 40.0
+      cMaxLight: 40                                             # qtrans = 3; light level triggering downwards swimming (W/m2), default = 40.0
+      cVswim: 8.249                                             # qtrans > 1; vertical migration speed (m/d), default = 15.0
+      kDRespZoo: 0.13331                                        # maintenance respiration rate at 20*C (1/d), default = 0.2
+      fDAssZoo: 0.4478                                          # dry weight assimilation efficiency (-), default = 0.35
+      kMortZoo: 0.05165                                         # mortality rate (1/d), default = 0.04
+      cPDZooRef: 0.01                                           # reference P/DW-ratio (mgP/mgDW), default = 0.01
+      cNDZooRef: 0.07                                           # reference N/DW-ratio (mgN/mgDW), default = 0.07
+      fDissEgesZoo: 0.1899                                      # soluble inorg. nutrient fraction of egested food (-), default = 0.25
+      fDissMortZoo: 0.13068                                     # soluble inorg. nutrient fraction of dead ind. (-), default = 0.1
+      fZooDOMW: 0.26067                                         # DOM fraction of dead individuals (-), default = 0.35
+      cSigTmZoo: 7.742                                          # temperature constant; sigma in Gaussian curve (*C), default = 13.0
+      cTmOptZoo: 26.501                                         # optimum temperature (*C), default = 22.0
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sD: 0.135                                                 # DW (gDW/m3)
+      sN: 0.0095                                                # N (gN/m3)
+      sP: 0.00136                                               # P (gP/m3)
+    coupling:                                                   # coupling
+      prey_model1: Diatom                                       # prey
+      prey_model2: NfixCyano                                    # prey
+      prey_model3: Green                                        # prey
+      prey_model4: abiotic_water                                # POM pray
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool in water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool in water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool in water (g/m3)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # particulate Si pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool in water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool in water (g/m3)
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool in water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW in water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N in water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P in water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 in water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # Oxygen pool water (g/m3)
+  MicroZoo:                                                     #
+    long_name: Microzooplankton                                 # long name
+    model: wet/zooplankton                                      # model
+    parameters:                                                 # parameters
+      nPrey: 2                                                  # number of prey types (-), default = 1
+      prey_suffix1: W                                           #  prey 1 name suffix(W=Water; S=Sediment; POMW = POM), default = ''
+      prey_suffix2: POMW                                        #  prey 2 name suffix(W=Water; S=Sediment; POMW = POM), default = ''
+      cClearPrey1: 0.8739                                       #  clearance rate for prey 1 (m3/gDW/d), default = 2.0
+      cClearPrey2: 4.482                                        #  clearance rate for prey 2 (m3/gDW/d), default = 2.0
+      fGutOccPrey1: 0.1                                         #  gut occupation factor for prey 1 (-), default = 1.0
+      fGutOccPrey2: 0.9                                         #  gut occupation factor for prey 2 (-), default = 1.0
+      lSi1: false                                               #  toggle prey 1 silica tracking (-), default = false
+      lSi2: false                                               #  toggle prey 2 silica tracking (-), default = false
+      qODB: 1                                                   #  toggle optimal diet breadth: 0=off; 1=on(-), default = 1
+      kDConsMaxZoo: 0.65                                        #  standard dry weight specific maximum consumption rate(gDW/gDW/d), default = 0.5
+      cDCarrZoo: 30                                             # carrying capacity (g/m3), default = 30.0
+      cDMinZoo: 0.006                                           # minimum DW concentration (gDW/m3), default = 1e-05 0.006
+      qTrans: 3                                                 # vert. trans. method: 1=passive; 2=O2; 3=O2 & Light (-), default = 2
+      cMinO2: 4.007                                             # qtrans > 1; oxygen conc. limit (gO2/m3), default = 2.0
+      cMinLight: 22.06                                          # qtrans = 3; light level triggering upwards swimming (W/m2), default = 40.0
+      cMaxLight: 11.446                                         # qtrans = 3; light level triggering downwards swimming (W/m2), default = 40.0
+      cVswim: 0.29494                                           # qtrans > 1; vertical migration speed (m/d), default = 15.0
+      kDRespZoo: 0.1                                            # maintenance respiration rate at 20*C (1/d), default = 0.2
+      fDAssZoo: 0.5                                             # dry weight assimilation efficiency (-), default = 0.35
+      kMortZoo: 0.03                                            # mortality rate (1/d), default = 0.04
+      cPDZooRef: 0.007                                          # reference P/DW-ratio (mgP/mgDW), default = 0.01
+      cNDZooRef: 0.049                                          # reference N/DW-ratio (mgN/mgDW), default = 0.07
+      fDissEgesZoo: 0.22481                                     # soluble inorg. nutrient fraction of egested food (-), default = 0.25
+      fDissMortZoo: 0.13534                                     # soluble inorg. nutrient fraction of dead ind. (-), default = 0.1
+      fZooDOMW: 0.3562                                          # DOM fraction of dead individuals (-), default = 0.35
+      cSigTmZoo: 11.594                                         # temperature constant; sigma in Gaussian curve (*C), default = 13.0
+      cTmOptZoo: 26.631                                         # optimum temperature (*C), default = 22.0
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sD: 0.2                                                   # DW (gDW/m3)
+      sN: 0.033                                                 # N (gN/m3)
+      sP: 0.0065                                                # P (gP/m3)
+    coupling:                                                   # coupling
+      prey_model1: Green                                        # prey
+      prey_model2: abiotic_water                                # pray or abiotic_water for POM
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool in water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool in water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool in water (g/m3)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # particulate Si pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool in water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool in water (g/m3)
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool in water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW in water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N in water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P in water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 in water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # Oxygen pool water (g/m3)
+  PredZoo:                                                      #
+    long_name: Predator_zooplankton                             # long name
+    model: wet/zooplankton                                      # model
+    parameters:                                                 # parameters
+      nPrey: 4                                                  # number of prey types (-), default = 1
+      prey_suffix3: W                                           #  prey 3 name suffix(W=Water; S=Sediment; POMW = POM; =zooplankton)
+      prey_suffix4: POMW                                        #  prey 4 name suffix(W=Water; S=Sediment; POMW = POM; =zooplankton)
+      cClearPrey1: 32.06                                        #  clearance rate for prey 1 (m3/gDW/d), default = 2.0
+      cClearPrey2: 9.000                                        #  clearance rate for prey 2 (m3/gDW/d), default = 2.0
+      cClearPrey3: 2.3238                                       #  clearance rate for prey 3 (m3/gDW/d), default = 2.0
+      cClearPrey4: 0.17529                                      #  clearance rate for prey 4 (m3/gDW/d), default = 2.0
+      fGutOccPrey1: 0.4                                         #  gut occupation factor for prey 1 (-), default = 1.0
+      fGutOccPrey2: 0.4                                         #  gut occupation factor for prey 2 (-), default = 1.0
+      fGutOccPrey3: 0.1                                         #  gut occupation factor for prey 3 (-), default = 1.0
+      fGutOccPrey4: 0.1                                         #  gut occupation factor for prey 4 (-), default = 1.0
+      lSi1: false                                               #  toggle prey 1 silica tracking (-), default = false
+      lSi2: false                                               #  toggle prey 2 silica tracking (-), default = false
+      lSi3: false                                               #  toggle prey 3 silica tracking (-), default = false
+      lSi4: false                                               #  toggle prey 4 silica tracking (-), default = false
+      qODB: 1                                                   #  toggle optimal diet breadth: 0=off; 1=on(-), default = 1
+      kDConsMaxZoo: 1.1329                                      #  standard dry weight specific maximum consumption rate(gDW/gDW/d), default = 0.5
+      cDCarrZoo: 25.0                                           # carrying capacity (g/m3), default = 25.0
+      cDMinZoo: 1e-05                                           # minimum DW concentration (gDW/m3), default = 1e-05
+      qTrans: 3                                                 # vert. trans. method: 1=passive; 2=O2; 3=O2 & Light (-), default = 2
+      cMinO2: 0.6977                                            # qtrans > 1; oxygen conc. limit (gO2/m3), default = 2.0
+      cMinLight: 13.77                                          # qtrans = 3; light level triggering upwards swimming (W/m2), default = 40.0
+      cMaxLight: 53.85                                          # qtrans = 3; light level triggering downwards swimming (W/m2), default = 40.0
+      cVswim: 1.1609                                            # qtrans > 1; vertical migration speed (m/d), default = 15.0
+      kDRespZoo: 0.18714                                        # maintenance respiration rate at 20*C (1/d), default = 0.2
+      fDAssZoo: 0.3184                                          # dry weight assimilation efficiency (-), default = 0.35
+      kMortZoo: 0.03879                                         # mortality rate (1/d), default = 0.04
+      cPDZooRef: 0.010949                                       # reference P/DW-ratio (mgP/mgDW), default = 0.01
+      cNDZooRef: 0.07077                                        # reference N/DW-ratio (mgN/mgDW), default = 0.07
+      fDissEgesZoo: 0.1797                                      # soluble inorg. nutrient fraction of egested food (-), default = 0.25
+      fDissMortZoo: 0.13076                                     # soluble inorg. nutrient fraction of dead ind. (-), default = 0.1
+      fZooDOMW: 0.15976                                         # DOM fraction of dead individuals (-), default = 0.35
+      cSigTmZoo: 17.455                                         # temperature constant; sigma in Gaussian curve (*C), default = 13.0
+      cTmOptZoo: 20.083                                         # optimum temperature (*C), default = 22.0
+      diagnostics: true                                        # add additional output
+    initialization:                                             # initialization
+      sD: 0.005                                                 # DW (gDW/m3)
+      sN: 0.002                                                 # N (gN/m3)
+      sP: 0.001                                                 # P (gP/m3)
+    coupling:                                                   # coupling
+      prey_model1: MicroZoo                                     # pray or abiotic_water for POM
+      prey_model2: HerbZoo                                      # pray or abiotic_water for POM
+      prey_model3: CyanoMC                                      # pray or abiotic_water for POM
+      prey_model4: abiotic_water                                # pray or abiotic_water for POM
+      POM_DW_pool_water: abiotic_water/sDPOMW                   # POM DW pool in water (g/m3)
+      POM_N_pool_water: abiotic_water/sNPOMW                    # POM N pool in water (g/m3)
+      POM_P_pool_water: abiotic_water/sPPOMW                    # POM P pool in water (g/m3)
+      SiPa_pool_water: abiotic_water/sSiPaW                     # particulate Si pool water (g/m3)
+      NH4_pool_water: abiotic_water/sNH4W                       # NH4 pool in water (g/m3)
+      NO3_pool_water: abiotic_water/sNO3W                       # NO3 pool in water (g/m3)
+      PO4_pool_water: abiotic_water/sPO4W                       # PO4 pool in water (g/m3)
+      DOM_DW_pool_water: abiotic_water/sDDOMW                   # DOM DW in water (g/m3)
+      DOM_N_pool_water: abiotic_water/sNDOMW                    # DOM N in water (g/m3)
+      DOM_P_pool_water: abiotic_water/sPDOMW                    # DOM P in water (g/m3)
+      SiO2_pool_water: abiotic_water/sSiO2W                     # SiO2 in water (g/m3)
+      oxygen_pool_water: abiotic_water/sO2W                     # Oxygen pool water (g/m3)

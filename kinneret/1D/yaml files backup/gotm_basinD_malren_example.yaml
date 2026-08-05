@@ -1,0 +1,556 @@
+title: Malaren Basin D
+location:
+   name: Basin D
+   latitude: 59.4
+   longitude: 17.4
+   depth: 50
+   hypsograph: hyps_D.dat
+water_balance_method: 1
+time:
+   start: 1995-01-01 00:00:00
+   stop: 2015-12-31 00:00:00
+   dt: 3600.0
+grid:
+   nlev: 100.0
+   method: 0
+   ddu: 0.0
+   ddl: 0.0
+   file:
+temperature:
+   method: 2
+   file: init_temp_D.dat
+   column: 1
+   analytical:
+      method: 1
+      z_t1: 30.0
+      t_1: 5.0
+      z_t2: 40.0
+      t_2: 5.0
+      obs_NN: 0.000256
+   relax:
+      tau: 1.0e+15
+salinity:
+   method: 0
+   file:
+   column: 1
+   analytical:
+      method: 1
+      z_s1: 30.0
+      s_1: 20.0
+      z_s2: 40.0
+      s_2: 15.0
+      obs_NN: 0.000256
+   relax:
+      tau: 1.0e+15
+surface:
+   fluxes:
+      method: 2
+      heat:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+         scale_factor: 1.0
+      tx:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      ty:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+   meteo:
+      u10:
+         method: 2
+         constant_value: 0.0
+         file: meteo.dat
+         column: 2
+         scale_factor: 1.0
+      v10:
+         method: 0
+         constant_value: 0.0
+         file: x.dat
+         column: 2
+         scale_factor: 1.0
+      airp:
+         method: 2
+         constant_value: 0.0
+         file: meteo.dat
+         column: 5
+         scale_factor: 1.0
+      airt:
+         method: 2
+         constant_value: 0.0
+         file: meteo.dat
+         column: 1
+      hum:
+         method: 2
+         constant_value: 0.0
+         file: meteo.dat
+         column: 3
+         scale_factor: 1.0
+         type: 1
+      cloud:
+         method: 0
+         constant_value: 0.0
+         file: x.dat
+         column: 6
+      swr:
+         method: 2
+         constant_value: 0.0
+         file: meteo.dat
+         column: 7
+         scale_factor: 1.0
+      precip:
+         method: 2
+         constant_value: 0.0
+         file: meteo.dat
+         column: 4
+         scale_factor: 1.157407e-08
+         flux_impact: false
+      calc_evaporation: true
+      ssuv_method: 0
+   longwave_radiation:
+      method: 0
+      file: meteo.dat
+      column: 6
+      type: 2
+   albedo:
+      method: 1
+      constant_value: 0.0
+   ice:
+      model: 2
+      H: 0.0
+   roughness:
+      charnock: false
+      charnock_val: 1400.0
+      z0s_min: 0.02
+bottom:
+   h0b: 0.05
+light_extinction:
+   method: 7
+   A:
+      method: 0
+      constant_value: 0.55
+      file:
+      column: 1
+   g1:
+      method: 0
+      constant_value: 0.5
+      file:
+      column: 1
+   g2:
+      method: 0
+      constant_value: 2.0
+      file:
+      column: 1
+turbulence:
+   turb_method: 3
+   tke_method: 2
+   len_scale_method: 8
+   stab_method: 3
+   turb_param:
+      cm0_fix: 0.5477
+      Prandtl0_fix: 0.74
+      cw: 100.0
+      compute_kappa: false
+      kappa: 0.4
+      compute_c3: true
+      Ri_st: 0.25
+      length_lim: true
+      galp: 0.53
+      const_num: 0.0005
+      const_nuh: 0.0005
+      k_min: 1.2780698e-06
+      eps_min: 1.0e-12
+      kb_min: 1.0e-10
+      epsb_min: 1.0e-14
+   generic:
+      gen_m: 1.0
+      gen_n: -0.67
+      cpsi1: 1.0
+      cpsi2: 1.22
+      cpsi3minus: 0.05
+      sig_kpsi: 0.8
+      sig_psi: 1.07
+   keps:
+      ce3minus: -0.4
+   my:
+      length: 3
+   scnd:
+      method: 1
+      scnd_coeff: 7
+   iw:
+      alpha: 0.7
+mimic_3d:
+   ext_pressure:
+      mode: 0
+      dpdx:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+         AmpM: 0.0
+         PhaseM: 0.0
+         AmpS: 0.0
+         PhaseS: 0.0
+      dpdy:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+         AmpM: 0.0
+         PhaseM: 0.0
+         AmpS: 0.0
+         PhaseS: 0.0
+      h:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      PeriodM: 44714.0
+      PeriodS: 43200.0
+   int_press:
+      dsdx:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      dsdy:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      dtdx:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      dtdy:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      t_adv: false
+      s_adv: false
+   zeta:
+      method: 0
+      constant_value: 0.0
+      file:
+      column: 1
+      offset: -9.77
+      period_1: 44714.0
+      amp_1: 0.0
+      phase_1: 0.0
+      period_2: 43200.0
+      amp_2: 0.0
+      phase_2: 0.0
+   w:
+      max:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      height:
+         method: 1
+         constant_value: 0.0
+         file:
+         column: 1
+      adv_discr: 6
+velocities:
+   u:
+      method: 0
+      file:
+      column: 1
+   v:
+      method: 0
+      file:
+      column: 1
+   relax:
+      tau: 1.0e+15
+      ramp: 1.0e+15
+o2:
+   scale_factor: 31.25
+streams:
+   fyrisan:
+      method: 1
+      zu: 0.0
+      zl: 0.0
+      flow:
+         method: 2
+         constant_value: 0.0
+         file: inflow_q_fyrisan.dat
+         column: 1
+         scale_factor: 1.0
+      temp:
+         method: 0
+         constant_value: -1.0
+         file: x.dat
+         column: 2
+      salt:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      selmaprotbas_po:
+         method: 0
+         constant_value: 0.1937359
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_nn:
+         method: 0
+         constant_value: 7.1377587
+         file: x.dat
+         column: 3
+         scale_factor: 1.0
+      selmaprotbas_aa:
+         method: 0
+         constant_value: 3.5688794
+         file: x.dat
+         column: 4
+         scale_factor: 1.0
+      selmaprotbas_si:
+         method: 0
+         constant_value: 81.8796725
+         file: x.dat
+         column: 5
+         scale_factor: 1.0
+      selmaprotbas_dd_c:
+         method: 0
+         constant_value: 416.3197336
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_p:
+         method: 0
+         constant_value: 1.7436229
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_n:
+         method: 0
+         constant_value: 60.6709493
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+   orsundaan:
+      method: 1
+      zu: 0.0
+      zl: 0.0
+      flow:
+         method: 2
+         constant_value: 0.0
+         file: inflow_q_orsundaan.dat
+         column: 1
+         scale_factor: 1.0
+      temp:
+         method: 0
+         constant_value: -1.0
+         file: x.dat
+         column: 2
+      salt:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      selmaprotbas_po:
+         method: 0
+         constant_value: 0.1937359
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_nn:
+         method: 0
+         constant_value: 7.1377587
+         file: x.dat
+         column: 3
+         scale_factor: 1.0
+      selmaprotbas_aa:
+         method: 0
+         constant_value: 3.5688794
+         file: x.dat
+         column: 4
+         scale_factor: 1.0
+      selmaprotbas_si:
+         method: 0
+         constant_value: 81.8796725
+         file: x.dat
+         column: 5
+         scale_factor: 1.0
+      selmaprotbas_dd_c:
+         method: 0
+         constant_value: 416.3197336
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_p:
+         method: 0
+         constant_value: 1.7436229
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_n:
+         method: 0
+         constant_value: 60.6709493
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+   oxundaan:
+      method: 1
+      zu: 0.0
+      zl: 0.0
+      flow:
+         method: 2
+         constant_value: 0.0
+         file: inflow_q_oxundaan.dat
+         column: 1
+         scale_factor: 1.0
+      temp:
+         method: 0
+         constant_value: -1.0
+         file: x.dat
+         column: 2
+      salt:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      selmaprotbas_po:
+         method: 0
+         constant_value: 0.1937359
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_nn:
+         method: 0
+         constant_value: 7.1377587
+         file: x.dat
+         column: 3
+         scale_factor: 1.0
+      selmaprotbas_aa:
+         method: 0
+         constant_value: 3.5688794
+         file: x.dat
+         column: 4
+         scale_factor: 1.0
+      selmaprotbas_si:
+         method: 0
+         constant_value: 81.8796725
+         file: x.dat
+         column: 5
+         scale_factor: 1.0
+      selmaprotbas_dd_c:
+         method: 0
+         constant_value: 416.3197336
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_p:
+         method: 0
+         constant_value: 1.7436229
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_n:
+         method: 0
+         constant_value: 60.6709493
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+   marstaan:
+      method: 1
+      zu: 0.0
+      zl: 0.0
+      flow:
+         method: 2
+         constant_value: 0.0
+         file: inflow_q_marstaan.dat
+         column: 1
+         scale_factor: 1.0
+      temp:
+         method: 0
+         constant_value: -1.0
+         file: x.dat
+         column: 2
+      salt:
+         method: 0
+         constant_value: 0.0
+         file:
+         column: 1
+      selmaprotbas_po:
+         method: 0
+         constant_value: 0.1937359
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_nn:
+         method: 0
+         constant_value: 7.1377587
+         file: x.dat
+         column: 3
+         scale_factor: 1.0
+      selmaprotbas_aa:
+         method: 0
+         constant_value: 3.5688794
+         file: x.dat
+         column: 4
+         scale_factor: 1.0
+      selmaprotbas_si:
+         method: 0
+         constant_value: 81.8796725
+         file: x.dat
+         column: 5
+         scale_factor: 1.0
+      selmaprotbas_dd_c:
+         method: 0
+         constant_value: 416.3197336
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_p:
+         method: 0
+         constant_value: 1.7436229
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+      selmaprotbas_dd_n:
+         method: 0
+         constant_value: 60.6709493
+         file: x.dat
+         column: 1
+         scale_factor: 1.0
+fabm:
+   use: true
+   freshwater_impact: true
+   feedbacks:
+      bottom_everywhere: true
+      shade: true
+      albedo: false
+      surface_drag: false
+   repair_state: true
+   numerics:
+      ode_method: 3
+      split_factor: 1
+buoyancy:
+   NN_ini: 0.0001
+eq_state:
+   mode: 2
+   method: 2
+   T0: 10.0
+   S0: 35.0
+   p0: 0.0
+   dtr0: -0.17
+   dsr0: 0.78
+restart:
+   load: false
+output:
+   output:
+      format: netcdf
+      time_unit: day
+      time_step: 1
+      time_method: mean
+      variables:
+      - source: /*

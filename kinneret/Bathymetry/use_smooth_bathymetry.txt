@@ -1,0 +1,17 @@
+Here is a short note on how to use a smoothed bathymetry.
+
+A new bathymetry.nc file with additional field for the bathymetry is required.
+
+New field(s) are named after the method used for the smoothing.
+
+The following lines needs to be changed in the run-script:
+
+    #with netCDF4.Dataset("Bathymetry/bathymetry.nc") as nc:
+    with netCDF4.Dataset("Bathymetry/bathymetry_400m_smoothed.nc") as nc:
+
+            #H=-1.0 * nc["bathymetry"][:, :],
+            #mask=np.where(nc["bathymetry"][...] == 1.0e37, 0, 1),
+            H=-1.0 * nc["positive_rx0"][:, :], 
+            mask=np.where(nc["positive_rx0"][...] == 9.96921e+36, 0, 1),
+
+I hope to streamline the procedure a bit - this is related to adding the updated smoothed fields to an existing bathymetry file - and very important - a consistent treatment of _FillValue.

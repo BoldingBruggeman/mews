@@ -1,0 +1,4 @@
+Targets,dn_sed,q10_recs,sedrate,br0,fds,wdz,wpo4,mbnnrate,mbsrate,den_frac_denanmx,den_frac_denanmx_sed,tau_crit,erorate,sedratepo4,eroratepo4,po4ret,pburialrate,fl_burialrate,pliberationrate,ipo4th
+selmaprotbas_fl_c_366__0_5.mean(),0.869,0.143,0.033,0.0884,0.00137,0.193,0,0.0953,0.032,1.07e-05,0.00325,3.69e-05,9.37e-08,0,0,0,0,0.428,0,0
+selmaprotbas_fl_p_366__0_5.mean(),0.79,0.138,0.0423,0.0997,0.00158,0.216,0,0.0968,0.0275,1.32e-05,0.00328,4.25e-05,1.14e-07,0,0,0,0,0.346,0,0
+selmaprotbas_fl_n_366__0_5.mean(),0.97,0.144,0.0339,0.0846,0.00136,0.189,0,0.0883,0.0485,1.11e-05,0.00327,3.96e-05,1.01e-07,0,0,0,0,0.501,0,0

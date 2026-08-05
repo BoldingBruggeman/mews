@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+# test reading river names from folder
+
+import glob
+import os
+
+river_list = []
+
+# Use os.path.join for cross-platform compatibility
+for river in glob.glob(os.path.join("Rivers", "inflow_q*.nc")):
+    # Extract the file name without the folder path
+    name = os.path.basename(river)
+    # Remove the prefix and suffix to get the river name
+    name = name.replace("inflow_q_", "").replace(".nc", "")
+    print("river name in river list upload:", name)
+    river_list.append(name)
+
+
+
+
+
+
+import sys
+print("\n".join(sys.path))
+
+
+
+import sys
+sys.path.append(r'C:\ProgramData\miniconda3\Lib\site-packages')
+
+try:
+    import pycpt
+    print('pycpt manually imported successfully')
+except Exception as e:
+    print(f'Import failed: {e}')

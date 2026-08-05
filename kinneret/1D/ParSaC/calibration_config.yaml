@@ -1,0 +1,15 @@
+parameters:
+- file: fabm.yaml
+  key: instances/selmaprotbas/parameters/dn
+  lower: 0.00005
+  upper: 0.005
+  logscale: false
+- file: fabm.yaml
+  key: instances/selmaprotbas/parameters/dn_sed
+  lower: 0.00005
+  upper: 0.003
+  logscale: false
+  key: instances/selmaprotbas/parameters/wdz
+  lower: -6.75
+  upper: 0.1
+  logscale: false

@@ -1,23 +1,29 @@
 #!/usr/bin/env python
 
+
+
 import datetime
 from pathlib import Path
 from typing import Optional
 import numpy as np
+import xarray as xr
 
 import cftime
 
 import pygetm
 
+
+
 setup = "ohra"
-setup = "kinneret"
 nz = 20
-ddu = 0.75
-ddl = 0.75
-Dgamma = 10.0
+ddu = 1.5
+ddl = 1.5
+Dgamma = 15.0
 timestep = 0.8
 use_adaptive = False
-
+light_A = 0.55
+light_kc1 = 2
+light_kc2 = 0.15
 
 def create_domain(
     runtype: int,
@@ -42,13 +48,12 @@ def create_domain(
     domain.limit_velocity_depth()
     domain.cfl_check()
     domain.mask_shallow(1.0)
-
-    # if rivers:
-    if False:
+    if rivers:
         river_list = []
-        for river in glob.glob(os.path.join("Rivers", "inflow_q*.nc")):
+        # Inflows
+        for river in glob.glob("Rivers/Inflow_file*.nc"):
             name = os.path.basename(river)
-            name = name.replace("inflow_q_", "").replace(".nc", "")
+            name = name.replace("Inflow_file_", "").replace(".nc", "")
             with netCDF4.Dataset(river) as r:
                 lon = r["lon"][:]
                 lat = r["lat"][:]
@@ -57,11 +62,48 @@ def create_domain(
                         name,
                         float(lon),
                         float(lat),
-                        coordinate_type=pygetm.CoordinateType.LONLAT,
+                        coordinate_type=pygetm.CoordinateType.LONLAT
                     )
                 )
+        # Outflows
+        for river in glob.glob("Rivers/Outflow_file*.nc"):
+            name = os.path.basename(river)
+            name = name.replace("Outflow_file_", "").replace(".nc", "")
+            with netCDF4.Dataset(river) as r:
+                lon = r["lon"][:]
+                lat = r["lat"][:]
+            river_list.append(
+                domain.rivers.add_by_location(
+                    name,
+                    float(lon),
+                    float(lat),
+                    coordinate_type=pygetm.CoordinateType.LONLAT,
+                    zu=40.17,   # upper depth limit
+                    zl=41.17    # lower depth limit
+                )
+            )
 
     return domain
+
+# Initialize airsea with DOWNWARD_FLUX for SSRD
+
+def rx0_to_supergrid(domain, rx0_u, rx0_v, fill_value=np.nan):
+    """
+    Map rx0 arrays returned by domain.get_rx0() onto supergrid arrays so they can be plotted
+    with domain.plot(field=...).
+    """
+    # Supergrid shape
+    ny_sup, nx_sup = domain.H.shape  # (ny*2+1, nx*2+1)
+
+    # Put rx0_u onto U points: [1::2, 2:-2:2]
+    rx0_u_sup = np.full((ny_sup, nx_sup), fill_value, dtype=float)
+    rx0_u_sup[1::2, 2:-2:2] = rx0_u
+
+    # Put rx0_v onto V points: [2:-2:2, 1::2]
+    rx0_v_sup = np.full((ny_sup, nx_sup), fill_value, dtype=float)
+    rx0_v_sup[2:-2:2, 1::2] = rx0_v
+
+    return rx0_u_sup, rx0_v_sup
 
 
 def create_simulation(
@@ -69,11 +111,18 @@ def create_simulation(
     runtype: pygetm.RunType,
     **kwargs,
 ) -> pygetm.simulation.Simulation:
+    import numpy as np
+    import pandas as pd
+    import os
+
     global use_adaptive
-    if False:
-        internal_pressure_method = pygetm.internal_pressure.BlumbergMellor()
-    else:
+    if True:
         internal_pressure = pygetm.internal_pressure.ShchepetkinMcwilliams()
+    else:
+        internal_pressure = pygetm.internal_pressure.BlumbergMellor()
+
+    if True:
+        airsea = pygetm.airsea.FluxesFromMeteo(shortwave_method=pygetm.DOWNWARD_FLUX,     calculate_evaporation=False )
 
     if True:
         vertical_coordinates = pygetm.vertical_coordinates.GVC(
@@ -125,23 +174,37 @@ def create_simulation(
     final_kwargs = dict(
         advection_scheme=pygetm.AdvectionScheme.SUPERBEE,
         # gotm=os.path.join(setup_dir, "gotmturb.nml"),
-        # airsea=airsea,
+        airsea=airsea,
         internal_pressure=internal_pressure,
         vertical_coordinates=vertical_coordinates,
-        delay_slow_ip=True,
+    #    delay_slow_ip=True,
+        Dmin = 0.2,
+        Dcrit = 1,
     )
     final_kwargs.update(kwargs)
-    sim = pygetm.Simulation(domain, runtype=runtype, **final_kwargs)
-
+    sim = pygetm.Simulation(domain, runtype=runtype, gotm = "gotm.yaml", **final_kwargs)
+  #  sim = pygetm.Simulation(domain, runtype=runtype, gotm = "gotm.yaml", fabm = "fabm.yaml", **final_kwargs)
     if sim.runtype < pygetm.RunType.BAROCLINIC:
         sim.sst = sim.airsea.t2m
     if sim.runtype == pygetm.RunType.BAROCLINIC:
-        sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+     #   sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
+        sim.radiation.A.fill(light_A)
+        sim.radiation.kc1.fill(light_kc1)
+        sim.radiation.kc2.fill(light_kc2)
+
 
     if not args.load_restart and sim.runtype == pygetm.RunType.BAROCLINIC:
         if True:
-           sim.temp.set(2)
-           sim.salt.set(0.1)
+           sim.temp.set(4)
+           sim.salt.set(0)
+           sim["zt"].all_values[:] = -2.64
+           sim["zint"].all_values[:] = -2.64
+           sim["ziot"].all_values[:] = -2.64
+           sim["zot"].all_values[:] = -2.64
+
+          # sim.zt.all_values = 
+           #sim["zt"].all_values = -7 you might have to do the same with zint, ziot, zot as well - to the same value - but do test that , in 2018 it is -2.64
+
         else:
             print("Read froom files")
             # sim.salt.set(
@@ -154,18 +217,56 @@ def create_simulation(
         sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
 
-    ERA_path = "ERA5/era5_????.nc"
-    sim.airsea.u10.set(pygetm.input.from_nc(ERA_path, "u10"))
-    sim.airsea.v10.set(pygetm.input.from_nc(ERA_path, "v10"))
-    sim.airsea.t2m.set(pygetm.input.from_nc(ERA_path, "t2m") - 273.15)
-    sim.airsea.d2m.set(pygetm.input.from_nc(ERA_path, "d2m") - 273.15)
-    sim.airsea.sp.set(pygetm.input.from_nc(ERA_path, "sp"))
-    sim.airsea.tcc.set(pygetm.input.from_nc(ERA_path, "tcc"))
-    ERA_path = "ERA5/precip_????.nc"
-    sim.airsea.tp.set(pygetm.input.from_nc(ERA_path, "tp") / 3600.0)
+    met_path = "ERA5/era5_????.nc"
+    
 
+
+    sim.airsea.u10.set(pygetm.input.from_nc(met_path, "u10")*1)
+    sim.airsea.v10.set(pygetm.input.from_nc(met_path, "v10")*1)
+    sim.airsea.t2m.set(pygetm.input.from_nc(met_path, "t2m") - 273.15)
+    sim.airsea.d2m.set(pygetm.input.from_nc(met_path, "d2m") - 273.15)
+    sim.airsea.sp.set(pygetm.input.from_nc(met_path, "sp"))
+    sim.airsea.tcc.set(pygetm.input.from_nc(met_path, "tcc"))
+    sim.airsea.tp.set(pygetm.input.from_nc(met_path, "tp") * 0)
+    if sim.airsea.shortwave_method == pygetm.DOWNWARD_FLUX:
+        sim.airsea.swr_downwards.set(
+            pygetm.input.from_nc(met_path, "ssrd")* ( 0.75/3600.0 )
+        )
+    for river in sim.rivers.values():
+        if "outflow" in river.name:
+           ### Outflow
+            river.flow.set(pygetm.input.from_nc(f"Rivers/Outflow_file_{river.name}.nc", "flow"))
+        else:
+          ### Inflow
+           river.flow.set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "flow"))         
+           river["temp"].follow_target_cell = False #(True makes it use the value from the basin)
+           river["temp"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "temp"))
+           # Nutrients
+         #  river["selmaprotbas_po"].follow_target_cell = False #(True makes it use the value from the basin)
+         #  river["selmaprotbas_po"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_po"))  
+         #  river["selmaprotbas_nn"].follow_target_cell = False
+         #  river["selmaprotbas_nn"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_nn"))
+         #  river["selmaprotbas_dd_p"].follow_target_cell = False
+         #  river["selmaprotbas_dd_p"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_ddp"))
+         #  river["selmaprotbas_dd_n"].follow_target_cell = False
+         #  river["selmaprotbas_dd_n"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_ddn"))
+         #  river["selmaprotbas_dd_c"].follow_target_cell = False
+         #  river["selmaprotbas_dd_c"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_ddc"))
+         #  river["selmaprotbas_pw"].follow_target_cell = False
+         #  river["selmaprotbas_pw"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_pw"))
+         #  river["selmaprotbas_o2"].follow_target_cell = False
+         #  river["selmaprotbas_o2"].set(pygetm.input.from_nc(f"Rivers/Inflow_file_{river.name}.nc", "selmaprotbas_o2"))
+         #  river["selmaprotbas_pw"].follow_target_cell = False
+         #  river["selmaprotbas_aa"].set(0.0)
+         #  river["selmaprotbas_pw"].follow_target_cell = False
+         #  river["selmaprotbas_si"].set(200)
+         #  river["selmaprotbas_pw"].follow_target_cell = False
+         #  river["selmaprotbas_dd_si"].set(200)
+
+
+    
+   # sim["age_age_of_water"].river_follow[:] = False # By default, precipitation also has age 0
     return sim
-
 
 def create_output(
     output_dir: str,
@@ -177,7 +278,7 @@ def create_output(
     path = Path(output_dir, "meteo.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
-        interval=datetime.timedelta(hours=1),
+        interval=datetime.timedelta(hours=240),
         sync_interval=None,
     )
     output.request(
@@ -187,15 +288,16 @@ def create_output(
         "t2m",
         "tcc",
         "tp",
+  #      "ssrd",
     )
 
     path = Path(output_dir, setup + "_2d.nc")
     output = sim.output_manager.add_netcdf_file(
         str(path),
-        interval=datetime.timedelta(hours=1),
+        interval=datetime.timedelta(hours=6),
         sync_interval=None,
     )
-    output.request("Ht", "zt", "u1", "v1", "tausxu", "tausyv")
+    output.request("Ht", "zt","Dt", "u1", "v1", "tausxu", "tausyv")
     if args.debug_output:
         output.request("maskt", "masku", "maskv")
         output.request("U", "V")
@@ -211,17 +313,19 @@ def create_output(
         )
     output.request("Ht", "uk", "vk", "ww", "SS", "num")
     if args.debug_output:
-        output.request("fpk", "fqk", "advpk", "advqk")  # 'diffpk', 'diffqk')
+        #output.request("fpk", "fqk", "advpk", "advqk")  # 'diffpk', 'diffqk')
+        output.request("fpk", "fqk","advpk", "advqk")  # 'diffpk', 'diffqk')
+
 
     if sim.runtype == pygetm.RunType.BAROCLINIC:
-        output.request("temp", "salt", "rho", "NN", "rad", "sst", "hnt", "nuh")
+        output.request("temp", "salt", "rho", "swr", "NN", "rad", "sst", "hnt", "nuh")
         if args.debug_output:
             output.request("idpdx", "idpdy")
         if use_adaptive:
             output.request("nug", "ga", "dga")
 
     if sim.fabm:
-        output.request("par", "med_ergom_o2", "med_ergom_OFL", "med_ergom_dd")
+        output.request( "selmaprotbas_po", "total_chlorophyll_calculator_result", "selmaprotbas_o2")
 
 
 def run(
@@ -239,11 +343,18 @@ def run(
         sim.start(
             simstart,
             timestep=timestep,
-            split_factor=25,
+            split_factor=20,
             **kwargs,
         )
+        debug_time = datetime.datetime.strptime(
+            "2018-10-01 00:00:00", "%Y-%m-%d %H:%M:%S"
+        )
         while sim.time < simstop:
-            sim.advance()
+            if sim.time < debug_time:
+                x= False
+            else:
+                x = True
+            sim.advance(check_finite=x)
         sim.finish()
 
 
@@ -266,25 +377,22 @@ if __name__ == "__main__":
         "--bathymetry_file",
         type=str,
         help="Name of bathymetry file",
-        default="Bathymetry/bathymetry.nc",
+        default="Bathymetry/bathymetry_smoothed_fixed_rx_525_75_rx_025.nc",
+     #   default="Bathymetry/bathymetry.nc",
     )
 
     parser.add_argument(
         "--bathymetry_name",
         type=str,
         help="Name of bathymetry variable",
-        default="bathymetry",
+        default="bathymetry_rx01_local_v",
+     #   default="bathymetry",
     )
 
     parser.add_argument(
         "--output_dir", type=str, help="Path to save output files", default="."
     )
 
-    parser.add_argument(
-        "--initial",
-        action="store_true",
-        help="Initial run salinity and temerature are specified",
-    )
     parser.add_argument(
         "--runtype",
         type=int,
@@ -322,18 +430,51 @@ if __name__ == "__main__":
             exit()
 
     domain = create_domain(args.runtype, args.rivers)
-
+#        domain = create_domain(args.runtype, args.rivers, H = -2)
     sim = create_simulation(domain, args.runtype)
 
     # for plot options see:
     # https://github.com/BoldingBruggeman/getm-rewrite/blob/fea843cbc78bd7d166bdc5ec71c8d3e3ed080a35/python/pygetm/domain.py#L1943
+   # if args.plot_domain:
+   #     f = domain.plot(show_mesh=False, show_subdomains=True, tiling=domain.create_tiling())
+   #     if f is not None:
+   #         f.savefig("domain_mesh.png")
+   #     f = domain.plot(show_mesh=False, show_mask=True)
+   #     if f is not None:
+   #         f.savefig("domain_mask.png")
+    def rx0_u_to_field(domain, rx0_u, fill=np.nan):
+        f = np.full(domain.H.shape, fill, dtype=float)
+        f[1::2, 2:-2:2] = rx0_u          # U points
+        f[1::2, 1:-3:2] = rx0_u          # fill gaps next to U points (visual only)
+        return f
+
+    def rx0_v_to_field(domain, rx0_v, fill=np.nan):
+        f = np.full(domain.H.shape, fill, dtype=float)
+        f[2:-2:2, 1::2] = rx0_v          # V points
+        f[1:-3:2, 1::2] = rx0_v          # fill gaps next to V points (visual only)
+        return f
+
     if args.plot_domain:
-        f = domain.plot(show_mesh=False, show_subdomains=False)
-        if f is not None:
-            f.savefig("domain_mesh.png")
-        f = domain.plot(show_mesh=False, show_mask=True)
-        if f is not None:
-            f.savefig("domain_mask.png")
+        domain.plot(show_mesh=True, show_subdomains=True, tiling=domain.create_tiling(), show_rivers=False).savefig("domain_mesh.png")
+        domain.plot(show_mesh=False, show_mask=True, show_subdomains=True, tiling=domain.create_tiling(), show_rivers=False).savefig("domain_mask.png")
+
+        rx0_u, rx0_v = domain.get_rx0(zmin=0.0, Dmin=0.0)
+
+        domain.plot(
+            field=rx0_u_to_field(domain, rx0_u),
+            show_bathymetry=False, show_rivers=False,
+            label="rx0_u", cmap="viridis",
+        ).savefig("rx0_u.png", dpi=200)
+
+        domain.plot(
+            field=rx0_v_to_field(domain, rx0_v),
+            show_bathymetry=False, show_rivers=False,
+            label="rx0_v", cmap="viridis",
+        ).savefig("rx0_v.png", dpi=200)
+
+        domain.plot(show_mesh=False, show_mask=True, show_subdomains=True, tiling=domain.create_tiling(), show_rivers=True).savefig("domain_mask.png")
+        
+        
 
     if args.output and not args.dryrun:
         create_output(args.output_dir, sim)
@@ -352,7 +493,7 @@ if __name__ == "__main__":
         simstart,
         simstop,
         dryrun=args.dryrun,
-        report=datetime.timedelta(hours=6),
+        report=datetime.timedelta(hours=3),
         report_totals=datetime.timedelta(days=7),
         profile=profile,
     )
